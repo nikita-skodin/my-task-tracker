@@ -3,4 +3,5 @@
 src/test
 target
 HELP.md
+my-task-tracker.iml
 src/main/resources/application-nikita.properties
