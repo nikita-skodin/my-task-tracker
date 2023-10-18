@@ -1,5 +1,5 @@
 .idea/
-.mvn/
+.mvn\wrapper\
 src/test/
 HELP.md
 application-nikita.properties
