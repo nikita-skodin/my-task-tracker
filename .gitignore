@@ -2,4 +2,4 @@
 .mvn\wrapper\
 src/test/
 HELP.md
-application-nikita.properties
+src\main\resources\pplication-nikita.properties
