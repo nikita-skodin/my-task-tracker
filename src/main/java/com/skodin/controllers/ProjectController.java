@@ -69,6 +69,36 @@ public class ProjectController {
 
 
     /**
+     * Передается пустой project после создания
+     */
+    @SneakyThrows
+    @PostMapping(CREATE_PROJECT)
+    public ResponseEntity<ProjectDTO> createProject(
+            @Valid @RequestBody ProjectDTO projectDTO,
+            BindingResult bindingResult
+    ){
+
+        if (projectDTO.getId() != null){
+            throw new BagRequestException("New project cannot has an id");
+        }
+
+        ProjectEntity project = ModelMapper.getProject(projectDTO);
+
+        projectValidator.validate(project, bindingResult);
+        checkBindingResult(bindingResult);
+
+        addStates(project);
+
+        ProjectEntity projectEntity = projectService.saveAndFlush(project);
+
+        ProjectDTO projectDTO1 = ModelMapper.getProjectDTO(projectEntity);
+
+        return ResponseEntity
+                .created(new URI("/api/projects/" + projectDTO1.getId()))
+                .body(projectDTO1);
+    }
+
+    /**
      * берет все поля из DTO,
      * для добавления нового state лучше использовать другой url
      */
@@ -88,36 +118,6 @@ public class ProjectController {
         return ResponseEntity
                 .ok()
                 .body(ModelMapper.getProjectDTO(update));
-    }
-
-    /**
-     * Передается пустой project после создания
-     */
-    @SneakyThrows
-    @PostMapping(CREATE_PROJECT)
-    public ResponseEntity<ProjectDTO> createProject(
-            @Valid @RequestBody ProjectDTO projectDTO,
-            BindingResult bindingResult
-    ){
-
-        if (projectDTO.getId() != null){
-            throw new BagRequestException("New project cannot has an id");
-        }
-
-        ProjectEntity project = ModelMapper.getProject(projectDTO);
-
-        projectValidator.validate(project, bindingResult);
-        checkBindingResult(bindingResult);
-        
-        addStates(project);
-
-        ProjectEntity projectEntity = projectService.saveAndFlush(project);
-
-        ProjectDTO projectDTO1 = ModelMapper.getProjectDTO(projectEntity);
-
-        return ResponseEntity
-                .created(new URI("/api/projects/" + projectDTO1.getId()))
-                .body(projectDTO1);
     }
 
     @DeleteMapping(DELETE_PROJECT_BY_ID)
@@ -147,7 +147,7 @@ public class ProjectController {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorDTO> handleException(ConstraintViolationException e){
+    private ResponseEntity<ErrorDTO> handleException(ConstraintViolationException e){
 
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
 
