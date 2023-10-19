@@ -18,7 +18,7 @@ endPoints:
 Post /api/projects - добавляет новый проект с тремя states (ResponseEntity<DTO>) +++
 Get /api/projects - возвращает все проекты (ResponseEntity<List<DTO>>) +++
 Get /api/projects?prefix=test - возвращает все проекты с префиксом тест (ResponseEntity<List<DTO>>) +++
-Get /api/projects/{id} - возвращает проект по id (ResponseEntity<DTO>)  +++@
+Get /api/projects/{id} - возвращает проект по id (ResponseEntity<DTO>)  +++
 Patch /api/projects/{id} - обновляет проект (ResponseEntity<DTO>) +++
 Delete /api/projects/{id} - удаляет проект по id  (ResponseEntity.ok) +++
 
