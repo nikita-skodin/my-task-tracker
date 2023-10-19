@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -40,6 +41,7 @@ public class ProjectController {
     public static final String GET_PROJECTS = "";
     public static final String GET_PROJECT_BY_ID = "/{id}";
     public static final String UPDATE_PROJECT_BY_ID = "/{id}";
+    public static final String DELETE_PROJECT_BY_ID = "/{id}";
 
     @GetMapping(GET_PROJECTS)
     public ResponseEntity<List<ProjectDTO>> getProjects(
@@ -116,6 +118,14 @@ public class ProjectController {
         return ResponseEntity
                 .created(new URI("/api/projects/" + projectDTO1.getId()))
                 .body(projectDTO1);
+    }
+
+    @DeleteMapping(DELETE_PROJECT_BY_ID)
+    public ResponseEntity<HttpStatus> deleteProjectById(@PathVariable Long id){
+
+        projectService.deleteById(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private void addStates(ProjectEntity project){

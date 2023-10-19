@@ -28,7 +28,7 @@ public class ProjectService {
 
     public ProjectEntity findById(Long aLong) {
         return projectRepository.findById(aLong)
-                .orElseThrow(() -> new NotFoundException("Project with id: \"" + aLong + "\" is not found"));
+                .orElseThrow(() -> new NotFoundException("Project with id: " + aLong + " is not found"));
     }
 
     public Optional<ProjectEntity> findByName(String name) {
