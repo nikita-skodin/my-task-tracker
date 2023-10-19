@@ -15,8 +15,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -25,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -37,7 +37,56 @@ public class ProjectController {
     ProjectValidator projectValidator;
 
     public static final String CREATE_PROJECT = "";
+    public static final String GET_PROJECTS = "";
+    public static final String GET_PROJECT_BY_ID = "/{id}";
+    public static final String UPDATE_PROJECT_BY_ID = "/{id}";
 
+    @GetMapping(GET_PROJECTS)
+    public ResponseEntity<List<ProjectDTO>> getProjects(
+            @RequestParam(required = false) Optional<String> prefix){
+
+        List<ProjectEntity> all;
+
+        if (prefix.isPresent()){
+            all = projectService.findAllByNameStartingWith(prefix.get().trim()); // вместо проверки просто trim
+        } else {
+            all = projectService.findAll();
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(all.stream().map(ModelMapper::getProjectDTO).collect(Collectors.toList()));
+    }
+
+    @GetMapping(GET_PROJECT_BY_ID)
+    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id){
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getProjectDTO(projectService.findById(id)));
+    }
+
+
+    /**
+     * берет все поля из DTO,
+     * для добавления нового state лучше использовать другой url
+     */
+    @PatchMapping(UPDATE_PROJECT_BY_ID)
+    public ResponseEntity<ProjectDTO> updateProject(
+            @Valid @RequestBody ProjectDTO projectDTO,
+            @PathVariable Long id,
+            BindingResult bindingResult){
+
+        ProjectEntity project = ModelMapper.getProject(projectDTO);
+
+        projectValidator.validate(project, bindingResult);
+        checkBindingResult(bindingResult);
+
+        ProjectEntity update = projectService.update(id, project);
+
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getProjectDTO(update));
+    }
 
     /**
      * Передается пустой project после создания
@@ -71,9 +120,9 @@ public class ProjectController {
 
     private void addStates(ProjectEntity project){
         project.addProjectEntities(
-                TaskStateEntity.builder().name("state1").order(0).build(),
-                TaskStateEntity.builder().name("state2").order(1).build(),
-                TaskStateEntity.builder().name("state3").order(2).build());
+                TaskStateEntity.builder().name("To do").order(0).build(),
+                TaskStateEntity.builder().name("In progress").order(1).build(),
+                TaskStateEntity.builder().name("Done").order(2).build());
     }
     
     private void checkBindingResult(BindingResult bindingResult) {

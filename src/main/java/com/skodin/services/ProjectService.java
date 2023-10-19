@@ -51,10 +51,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public void update (Long id, ProjectEntity source){
+    public ProjectEntity update (Long id, ProjectEntity source){
         ProjectEntity byId = findById(id);
         source.setId(byId.getId());
-        projectRepository.save(source);
+        return projectRepository.saveAndFlush(source);
     }
 
     @Transactional
