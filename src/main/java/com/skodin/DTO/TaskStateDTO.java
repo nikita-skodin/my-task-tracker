@@ -39,4 +39,5 @@ public class TaskStateDTO {
     @Builder.Default
     @JsonProperty("task_entities")
     List<TaskDTO> taskEntities = new ArrayList<>();
+
 }

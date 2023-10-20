@@ -23,10 +23,8 @@ public class TaskDTO {
 
     String name;
 
-    @Builder.Default
     @JsonProperty("created_at")
-    // TODO: 019 можно убрать дефолтное значение из дто и тогда не придется указывать при обновлении
-    Instant createdAt = Instant.now();
+    Instant createdAt;
 
     @Builder.Default
     @JsonProperty("is_done")
