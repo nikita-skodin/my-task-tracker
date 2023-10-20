@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/projects")
-public class ProjectController {
+public class ProjectController extends MainController{
 
     ProjectService projectService;
     ProjectValidator projectValidator;
@@ -77,9 +77,9 @@ public class ProjectController {
             @Valid @RequestBody ProjectDTO projectDTO,
             BindingResult bindingResult
     ){
-
+        // TODO: 020 по сути валидация дто не нужна так как она срабатывает на методе validate когда мы уже замапили dto
         if (projectDTO.getId() != null){
-            throw new BagRequestException("New project cannot has an id");
+            throw new BagRequestException("New Project cannot has an id");
         }
 
         ProjectEntity project = ModelMapper.getProject(projectDTO);
@@ -133,34 +133,6 @@ public class ProjectController {
                 TaskStateEntity.builder().name("To do").order(0).build(),
                 TaskStateEntity.builder().name("In progress").order(1).build(),
                 TaskStateEntity.builder().name("Done").order(2).build());
-    }
-    
-    private void checkBindingResult(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()){
-            List<ObjectError> allErrors = bindingResult.getAllErrors();
-            for (var error: allErrors) {
-                if (Objects.equals(error.getCode(), "400")){
-                    throw new BagRequestException(error.getDefaultMessage());
-                }
-            }
-        }
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<ErrorDTO> handleException(ConstraintViolationException e){
-
-        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
-
-        StringBuilder response = new StringBuilder();
-
-        for (var el : constraintViolations) {
-            response.append(el.getMessage()).append("; ");
-        }
-
-        return ResponseEntity
-                .status(400)
-                .body(new ErrorDTO("BAD_REQUEST", response.toString()));
-
     }
 
 }

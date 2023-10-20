@@ -22,8 +22,8 @@ Get /api/projects/{id} - возвращает проект по id (ResponseEnti
 Patch /api/projects/{id} - обновляет проект (ResponseEntity<DTO>) +++
 Delete /api/projects/{id} - удаляет проект по id  (ResponseEntity.ok) +++
 
-Get /api/projects/{project_id}/task-states - возвращает все стопки для проекта (ResponseEntity<List<DTO>>)
-Post /api/projects/{project_id}/taks-states - добавляет новую стопку (ResponseEntity.ok)
+Get /api/projects/{project_id}/task-states - возвращает все стопки для проекта (ResponseEntity<List<DTO>>) +++
+Post /api/projects/{project_id}/taks-states - добавляет новую стопку (ResponseEntity<DTO>)
 Patch /api/projects/{project_id}/task-states - обновляет orders стопок (ResponseEntity<DTO>)
 Get /api/projects/{project_id}/task-states/{task-states_id}- возвращает стопку по id (ResponseEntity<DTO>)
 Patch /api/projects/{project_id}/task-states/{task-states_id} - обновляет стопку (ResponseEntity<DTO>)
