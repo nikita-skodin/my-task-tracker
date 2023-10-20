@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -35,7 +36,8 @@ public class TaskStateValidator implements Validator {
         Optional<TaskStateEntity> entityByNameAndProject = taskStateService
                 .findTaskStateEntityByNameAndProject(name, project);
 
-        if (entityByNameAndProject.isPresent()){
+        if (entityByNameAndProject.isPresent() &&
+                !Objects.equals(entityByNameAndProject.get().getId(), taskStateEntity.getId())){
             errors.rejectValue("name", "400",
                     String.format("Task State with name %s is already exist in project with id %d",
                             name, project.getId()));
@@ -44,7 +46,9 @@ public class TaskStateValidator implements Validator {
         Optional<TaskStateEntity> entityByOrderAndProject =
                 taskStateService.findTaskStateEntityByOrderAndProject(order, project);
 
-        if (entityByOrderAndProject.isPresent()){
+        if (entityByOrderAndProject.isPresent() &&
+                !Objects.equals(entityByOrderAndProject.get().getId(), taskStateEntity.getId())){
+
             errors.rejectValue("order", "400",
                     String.format("Task State with order %d is already exist in project with id %d",
                             order, project.getId()));

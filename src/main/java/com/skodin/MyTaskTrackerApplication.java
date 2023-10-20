@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MyTaskTrackerApplication {
-
+    // TODO: 020 добавить изменение order в методе taskStateController.updateProject
     public static void main(String[] args) {
         SpringApplication.run(MyTaskTrackerApplication.class, args);
     }

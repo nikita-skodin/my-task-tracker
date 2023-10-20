@@ -16,6 +16,5 @@ public interface TaskStateRepository extends JpaRepository<TaskStateEntity, Long
     int countAllByProjectId(Long projectId);
 
     Optional<TaskStateEntity> findTaskStateEntityByOrderAndProject(Integer order, ProjectEntity project);
-
 }
 

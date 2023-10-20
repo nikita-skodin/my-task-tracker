@@ -24,7 +24,7 @@ public class TaskStateService {
 
     public TaskStateEntity findById(Long aLong) {
         return taskStateRepository.findById(aLong)
-                .orElseThrow(() -> new NotFoundException("Task State with id: " + aLong + " is not found"));
+                .orElseThrow(() -> new NotFoundException("Task State with id: " + aLong + " did not found"));
     }
 
     @Transactional

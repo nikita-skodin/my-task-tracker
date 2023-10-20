@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,8 @@ public class TaskStateController extends MainController {
     public static final String CREATE_TASK_STATE = "";
     public static final String UPDATE_ORDER = "";
     public static final String GET_TASK_STATE_BY_ID = "/{task-state_id}";
+    public static final String UPDATE_TASK_STATE_BY_ID = "/{task-state_id}";
+    public static final String DELETE_TASK_STATE_BY_ID = "/{task-state_id}";
 
     @GetMapping(GET_ALL_TASK_STATES)
     public ResponseEntity<List<TaskStateDTO>> getAllTaskStates(@PathVariable("project_id") Long id) {
@@ -60,10 +63,7 @@ public class TaskStateController extends MainController {
 
         TaskStateEntity taskStateEntity = taskStateService.findById(taskStateId);
 
-        if (!Objects.equals(projectId, taskStateEntity.getProject().getId())){
-            throw new NotFoundException(String.format(
-                    "There is no Task State with id %d in Project with id %d", taskStateId, projectId));
-        }
+        taskStateInProjectOrThrowEx(taskStateId, projectId, taskStateEntity);
 
         return ResponseEntity
                 .ok()
@@ -107,6 +107,33 @@ public class TaskStateController extends MainController {
 
     }
 
+    /**
+     * берет все поля из DTO,
+     * для добавления нового task лучше использовать другой url
+     * order должен оставаться неизменным, потом пофиксим
+     */
+    @PatchMapping(UPDATE_TASK_STATE_BY_ID)
+    // TODO: 020 добавить возможность обновления order
+    // TODO: 020 и projectId тоже не добавляется
+    public ResponseEntity<TaskStateDTO> updateProject(
+            @RequestBody TaskStateDTO taskStateDTO,
+            BindingResult bindingResult,
+            @PathVariable("task-state_id") Long taskStateId,
+            @PathVariable("project_id") Long projectId){
+        TaskStateEntity taskState = ModelMapper.getTaskState(taskStateDTO, projectService);
+
+        taskStateInProjectOrThrowEx(taskStateId, projectId, taskState);
+
+        taskStateValidator.validate(taskState, bindingResult);
+        checkBindingResult(bindingResult);
+
+        TaskStateEntity update = taskStateService.update(taskStateId, taskState);
+
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getTaskStateDTO(update));
+    }
+
     @PatchMapping(UPDATE_ORDER)
     public ResponseEntity<List<TaskStateDTO>> updateOrder(
             @PathVariable("project_id") Long id,
@@ -143,9 +170,45 @@ public class TaskStateController extends MainController {
                         .map(ModelMapper::getTaskStateDTO).collect(Collectors.toList()));
     }
 
+    @DeleteMapping(DELETE_TASK_STATE_BY_ID)
+    public ResponseEntity<HttpStatus> deleteTasStateById(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-state_id") Long taskStateId){
+
+        TaskStateEntity byId = taskStateService.findById(taskStateId);
+
+        taskStateInProjectOrThrowEx(taskStateId, projectId, byId);
+
+        taskStateService.deleteById(taskStateId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private void taskStateInProjectOrThrowEx(Long taskStateId, Long projectId, TaskStateEntity taskState) {
+        if (!Objects.equals(projectId, taskState.getProject().getId())){
+            throw new NotFoundException(String.format(
+                    "There is no Task State with id %d in Project with id %d", taskStateId, projectId));
+        }
+    }
+
     private void setOrder(TaskStateEntity taskState1, TaskStateEntity taskState2) {
         int order = taskState1.getOrder();
         taskState1.setOrder(taskState2.getOrder());
         taskState2.setOrder(order);
     }
 }
+
+/*
+if (!Objects.equals(update.getOrder(), taskState.getOrder())){
+            // TODO: 020 можем поменять им order прямо тут, вопрос в транзакции
+            Optional<TaskStateEntity> optional =
+                    taskStateService.findTaskStateEntityByOrderAndProject(update.getOrder(), project);
+
+            if (optional.isPresent()){
+                optional.get().setOrder(taskState.getOrder());
+                taskStateService.save(optional.get());
+            }else {
+                throw new NotFoundException("Не найдена стопка с id " + update.getOrder());
+            }
+        }
+*/
