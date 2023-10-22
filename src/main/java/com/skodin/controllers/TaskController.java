@@ -1,7 +1,6 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskDTO;
-import com.skodin.DTO.TaskStateDTO;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -39,6 +37,7 @@ public class TaskController extends MainController{
 
     public static final String ADD_NEW_TASK = "";
     public static final String GET_ALL_TASKS = "";
+    public static final String GET_TASK_BY_ID = "/{task_id}";
 
 
     /**
@@ -84,6 +83,29 @@ public class TaskController extends MainController{
                 .ok()
                 .body(taskEntities.stream()
                         .map(ModelMapper::getTaskDTO).collect(Collectors.toList()));
+
+    }
+
+    @GetMapping(GET_TASK_BY_ID)
+    public ResponseEntity<TaskDTO> getTaskById(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-states_id") Long taskStateId,
+            @PathVariable("task_id") Long taskId){
+
+
+        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId);
+
+        TaskEntity taskEntity = taskService.findById(taskId);
+
+        if (!tuple.getTaskState().getTaskEntities().contains(taskEntity)) {
+            throw new NotFoundException(
+                    String.format("There is no Task with id %d in Task State with id %d",
+                            taskId, taskStateId));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getTaskDTO(taskEntity));
 
     }
 
