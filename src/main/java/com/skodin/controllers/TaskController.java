@@ -1,6 +1,7 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskDTO;
+import com.skodin.exceptions.BagRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
@@ -11,10 +12,12 @@ import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.util.ProjectTaskStateTuple;
 import com.skodin.validators.TaskValidator;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/projects/{project_id}/task-states/{task-states_id}/tasks")
-public class TaskController extends MainController{
+public class TaskController extends MainController {
 
     TaskService taskService;
     ProjectService projectService;
@@ -38,6 +41,8 @@ public class TaskController extends MainController{
     public static final String ADD_NEW_TASK = "";
     public static final String GET_ALL_TASKS = "";
     public static final String GET_TASK_BY_ID = "/{task_id}";
+    public static final String DELETE_TASK_BY_ID = "/{task_id}";
+    public static final String UPDATE_TASK_BY_ID = "/{task_id}";
 
 
     /**
@@ -49,10 +54,10 @@ public class TaskController extends MainController{
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @RequestBody TaskDTO taskDTO,
-            BindingResult bindingResult){
+            BindingResult bindingResult) {
 
 
-        checkTaskStateInProjectOrThrowEx(projectId, taskStateId);
+        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
         taskDTO.setTaskStateId(taskStateId);
         TaskEntity task = ModelMapper.getTask(taskDTO, taskStateService);
@@ -72,10 +77,10 @@ public class TaskController extends MainController{
     @GetMapping(GET_ALL_TASKS)
     public ResponseEntity<List<TaskDTO>> getTasks(
             @PathVariable("project_id") Long projectId,
-            @PathVariable("task-states_id") Long taskStateId){
+            @PathVariable("task-states_id") Long taskStateId) {
 
 
-        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId);
+        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
         List<TaskEntity> taskEntities = tuple.getTaskState().getTaskEntities();
 
@@ -90,18 +95,12 @@ public class TaskController extends MainController{
     public ResponseEntity<TaskDTO> getTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
-            @PathVariable("task_id") Long taskId){
+            @PathVariable("task_id") Long taskId) {
 
 
-        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId);
+        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         TaskEntity taskEntity = taskService.findById(taskId);
-
-        if (!tuple.getTaskState().getTaskEntities().contains(taskEntity)) {
-            throw new NotFoundException(
-                    String.format("There is no Task with id %d in Task State with id %d",
-                            taskId, taskStateId));
-        }
 
         return ResponseEntity
                 .ok()
@@ -109,14 +108,72 @@ public class TaskController extends MainController{
 
     }
 
-    private ProjectTaskStateTuple checkTaskStateInProjectOrThrowEx(Long projectId, Long taskStateId) {
+
+    /**
+     * Менять можно все
+     */
+    @PatchMapping(UPDATE_TASK_BY_ID)
+    public ResponseEntity<TaskDTO> updateTaskById(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-states_id") Long taskStateId,
+            @PathVariable("task_id") Long taskId,
+            @Valid @RequestBody TaskDTO taskDTO,
+            BindingResult bindingResult) {
+
+        if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
+           throw new BagRequestException("Id in DTO and in url must be the same");    //???
+        }
+
+        taskDTO.setId(taskId);
+        TaskEntity task = ModelMapper.getTask(taskDTO, taskStateService);
+
+        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
+        taskValidator.validate(task, bindingResult);
+        checkBindingResult(bindingResult);
+
+        TaskEntity updated = taskService.update(taskId, task);
+
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getTaskDTO(updated));
+    }
+
+
+    @DeleteMapping(DELETE_TASK_BY_ID)
+    public ResponseEntity<HttpStatus> deleteTaskById(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-states_id") Long taskStateId,
+            @PathVariable("task_id") Long taskId) {
+
+        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
+
+        System.out.println(taskId);
+        taskService.deleteById(taskId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // TODO: 022  можно пойти от обратного и забирать из геттеров у task объекты и проверять их,
+    //  так мы оптимизируем работу с бд
+    private ProjectTaskStateTuple checkTaskStateInProjectOrThrowEx(Long projectId, Long taskStateId, Long taskId) {
         ProjectEntity project = projectService.findById(projectId);
         TaskStateEntity taskState = taskStateService.findById(taskStateId);
 
-        if (!project.getTaskStateEntities().contains(taskState)){
+        if (!project.getTaskStateEntities().contains(taskState)) {
             throw new NotFoundException(
                     String.format("There is no Task State with id %d in Project with id %d",
                             taskStateId, projectId));
+        }
+
+        if (taskId != null) {
+
+            TaskEntity taskEntity = taskService.findById(taskId);
+
+            if (!taskState.getTaskEntities().contains(taskEntity)) {
+                throw new NotFoundException(
+                        String.format("There is no Task with id %d in Task State with id %d",
+                                taskId, taskStateId));
+            }
         }
 
         return new ProjectTaskStateTuple(project, taskState);

@@ -121,7 +121,6 @@ public class TaskStateController extends MainController {
             @PathVariable("task-state_id") Long taskStateId,
             @PathVariable("project_id") Long projectId){
 
-        System.out.println("DTO from HTTP:\n" + taskStateDTO);
         TaskStateEntity taskStateFromHttp = ModelMapper.getTaskState(taskStateDTO, projectService);
 
         taskStateInProjectOrThrowEx(taskStateId, projectId, taskStateFromHttp);
