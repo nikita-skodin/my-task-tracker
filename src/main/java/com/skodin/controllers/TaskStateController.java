@@ -173,6 +173,7 @@ public class TaskStateController extends MainController {
                         .map(ModelMapper::getTaskStateDTO).collect(Collectors.toList()));
     }
 
+    // TODO: 022 добавить смену порядка при удалении
     @DeleteMapping(DELETE_TASK_STATE_BY_ID)
     public ResponseEntity<HttpStatus> deleteTasStateById(
             @PathVariable("project_id") Long projectId,
