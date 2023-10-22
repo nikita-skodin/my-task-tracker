@@ -39,7 +39,7 @@ public class ModelMapper {
 
     public static TaskDTO getTaskDTO (TaskEntity entity){
         TaskDTO map = modelMapper.map(entity, TaskDTO.class);
-        map.setTaskStateId(entity.getId());
+        map.setTaskStateId(entity.getTaskStateEntity().getId());
         return map;
     }
 

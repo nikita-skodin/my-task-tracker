@@ -108,7 +108,7 @@ public class TaskStateController extends MainController {
     }
 
     /**
-     * берет все поля из DTO,
+     * Берет все поля из DTO,
      * для добавления нового task лучше использовать другой url
      * order должен оставаться неизменным, потом пофиксим
      */
@@ -120,14 +120,18 @@ public class TaskStateController extends MainController {
             BindingResult bindingResult,
             @PathVariable("task-state_id") Long taskStateId,
             @PathVariable("project_id") Long projectId){
-        TaskStateEntity taskState = ModelMapper.getTaskState(taskStateDTO, projectService);
 
-        taskStateInProjectOrThrowEx(taskStateId, projectId, taskState);
+        System.out.println("DTO from HTTP:\n" + taskStateDTO);
+        TaskStateEntity taskStateFromHttp = ModelMapper.getTaskState(taskStateDTO, projectService);
 
-        taskStateValidator.validate(taskState, bindingResult);
+        taskStateInProjectOrThrowEx(taskStateId, projectId, taskStateFromHttp);
+
+        TaskStateEntity taskStateFromDB = taskStateService.findById(taskStateId);
+
+        taskStateValidator.validate(taskStateFromHttp, bindingResult);
         checkBindingResult(bindingResult);
 
-        TaskStateEntity update = taskStateService.update(taskStateId, taskState);
+        TaskStateEntity update = taskStateService.update(taskStateId, taskStateFromHttp);
 
         return ResponseEntity
                 .ok()

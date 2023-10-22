@@ -44,6 +44,6 @@ public class TaskStateEntity {
     ProjectEntity project;
 
     @Builder.Default
-    @OneToMany(mappedBy = "taskStateEntity")
+    @OneToMany(mappedBy = "taskStateEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     List<TaskEntity> taskEntities = new ArrayList<>();
 }
