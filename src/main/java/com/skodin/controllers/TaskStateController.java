@@ -130,6 +130,7 @@ public class TaskStateController extends MainController {
         taskStateValidator.validate(taskStateFromHttp, bindingResult);
         checkBindingResult(bindingResult);
 
+
         TaskStateEntity update = taskStateService.update(taskStateId, taskStateFromHttp);
 
         return ResponseEntity
