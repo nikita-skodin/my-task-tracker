@@ -27,7 +27,11 @@ public class TaskStateDTO {
 
     String name;
 
-    Integer order;
+
+    @JsonProperty("previous_task_stateId")
+    Long previousTaskStateId;
+    @JsonProperty("next_task_stateId")
+    Long nextTaskStateId;
 
     @Builder.Default
     @JsonProperty("created_at")

@@ -12,6 +12,7 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
+@ToString(exclude = {"taskStateEntity"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,16 +32,12 @@ public class TaskEntity {
     @Builder.Default
     Instant createdAt = Instant.now();
 
-    @NotNull
-    @Builder.Default
-    Boolean isDone = false;
-
     @Size(max = 100,
             message = "description`s length should be less than 100")
     String description;
 
     @ManyToOne
-    @JoinColumn(name = "task-state_id", referencedColumnName = "id")
+    @JoinColumn(name = "task_state_id", referencedColumnName = "id")
     TaskStateEntity taskStateEntity;
 
 }

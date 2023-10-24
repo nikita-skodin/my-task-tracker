@@ -27,13 +27,19 @@ public class ModelMapper {
 
     public static TaskStateDTO getTaskStateDTO (TaskStateEntity entity){
         TaskStateDTO map = modelMapper.map(entity, TaskStateDTO.class);
-        map.setProjectId(entity.getProject().getId());
+        map.setPreviousTaskStateId(entity.getPreviousTaskState().map(TaskStateEntity::getId).orElse(null));
+        map.setNextTaskStateId(entity.getNextTaskState().map(TaskStateEntity::getId).orElse(null));
         return map;
     }
 
-    public static TaskStateEntity getTaskState (TaskStateDTO stateDTO, ProjectService projectService){
+    public static TaskStateEntity getTaskState (TaskStateDTO stateDTO, TaskStateService stateService){
         TaskStateEntity map = modelMapper.map(stateDTO, TaskStateEntity.class);
-        map.setProject(projectService.findById(stateDTO.getProjectId()));
+
+        Long nextTaskStateId = stateDTO.getNextTaskStateId();
+        Long previousTaskStateId = stateDTO.getPreviousTaskStateId();
+
+        map.setNextTaskState(nextTaskStateId == null ? null : stateService.findById(nextTaskStateId));
+        map.setPreviousTaskState(previousTaskStateId == null ? null : stateService.findById(previousTaskStateId));
         return map;
     }
 
@@ -45,6 +51,7 @@ public class ModelMapper {
 
     public static TaskEntity getTask (TaskDTO taskDTO, TaskStateService taskStateService){
         TaskEntity map = modelMapper.map(taskDTO, TaskEntity.class);
+        System.err.println(taskDTO);
         map.setTaskStateEntity(taskStateService.findById(taskDTO.getTaskStateId()));
         return map;
     }

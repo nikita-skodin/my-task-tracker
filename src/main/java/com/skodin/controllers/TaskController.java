@@ -97,7 +97,6 @@ public class TaskController extends MainController {
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId) {
 
-
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         TaskEntity taskEntity = taskService.findById(taskId);
@@ -117,7 +116,7 @@ public class TaskController extends MainController {
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId,
-            @Valid @RequestBody TaskDTO taskDTO,
+            @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
 
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
@@ -125,6 +124,7 @@ public class TaskController extends MainController {
         }
 
         taskDTO.setId(taskId);
+        taskDTO.setTaskStateId(taskStateId);
         TaskEntity task = ModelMapper.getTask(taskDTO, taskStateService);
 
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);

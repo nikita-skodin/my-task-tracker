@@ -14,6 +14,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -26,10 +27,6 @@ public class TaskDTO {
     @JsonProperty("created_at")
     @Builder.Default
     Instant createdAt = Instant.now();
-
-    @Builder.Default
-    @JsonProperty("is_done")
-    Boolean isDone = false;
 
     String description;
 

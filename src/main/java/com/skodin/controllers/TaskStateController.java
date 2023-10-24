@@ -39,7 +39,6 @@ public class TaskStateController extends MainController {
 
     public static final String GET_ALL_TASK_STATES = "";
     public static final String CREATE_TASK_STATE = "";
-    public static final String UPDATE_ORDER = "";
     public static final String GET_TASK_STATE_BY_ID = "/{task-state_id}";
     public static final String UPDATE_TASK_STATE_BY_ID = "/{task-state_id}";
     public static final String DELETE_TASK_STATE_BY_ID = "/{task-state_id}";
@@ -78,20 +77,17 @@ public class TaskStateController extends MainController {
     @SneakyThrows
     @PostMapping(CREATE_TASK_STATE)
     public ResponseEntity<TaskStateDTO> createTaskState(
-            @Valid @RequestBody TaskStateDTO taskStateDTO,
+            @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("project_id") Long id) {
 
         if (taskStateDTO.getId() != null) {
             throw new BagRequestException("New Task State cannot has an id");
         }
-        if (taskStateDTO.getOrder() == null) {
-            throw new BagRequestException("New Task State should has an order");
-        }
 
         taskStateDTO.setProjectId(id);
 
-        TaskStateEntity taskState = ModelMapper.getTaskState(taskStateDTO, projectService);
+        TaskStateEntity taskState = ModelMapper.getTaskState(taskStateDTO, taskStateService);
 
         taskStateValidator.validate(taskState, bindingResult);
         checkBindingResult(bindingResult);
@@ -113,65 +109,32 @@ public class TaskStateController extends MainController {
      * order должен оставаться неизменным, потом пофиксим
      */
     @PatchMapping(UPDATE_TASK_STATE_BY_ID)
-    // TODO: 020 добавить возможность обновления order
-    // TODO: 020 и projectId тоже не добавляется
+    // TODO: 020 добавить изменение связей
+    // TODO: 022 так же при этом сделать проверку на то, что обе стопки принадлежат одному проекту
+    // TODO: 023 создавать стопку можно только в конце по логике проекта, добавить поддержку этого в метод create
     public ResponseEntity<TaskStateDTO> updateProject(
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("task-state_id") Long taskStateId,
             @PathVariable("project_id") Long projectId){
 
-        TaskStateEntity taskStateFromHttp = ModelMapper.getTaskState(taskStateDTO, projectService);
+        if (!Objects.equals(projectId, taskStateDTO.getProjectId())){
+            throw new BagRequestException("You can not change project for Task States");
+        }
+
+        taskStateDTO.setId(taskStateId);
+        TaskStateEntity taskStateFromHttp = ModelMapper.getTaskState(taskStateDTO, taskStateService);
 
         taskStateInProjectOrThrowEx(taskStateId, projectId, taskStateFromHttp);
 
-        TaskStateEntity taskStateFromDB = taskStateService.findById(taskStateId);
-
         taskStateValidator.validate(taskStateFromHttp, bindingResult);
         checkBindingResult(bindingResult);
-
 
         TaskStateEntity update = taskStateService.update(taskStateId, taskStateFromHttp);
 
         return ResponseEntity
                 .ok()
                 .body(ModelMapper.getTaskStateDTO(update));
-    }
-
-    @PatchMapping(UPDATE_ORDER)
-    public ResponseEntity<List<TaskStateDTO>> updateOrder(
-            @PathVariable("project_id") Long id,
-            @RequestBody List<TaskStateDTO> taskStateDTOS){
-
-        if (taskStateDTOS.size() != 2) {
-            throw new BagRequestException("List should has 2 objects");
-        }
-
-        TaskStateDTO taskStateDTO1 = taskStateDTOS.get(0);
-        TaskStateDTO taskStateDTO2 = taskStateDTOS.get(1);
-
-        if (!Objects.equals(taskStateDTO1.getProjectId(), taskStateDTO2.getProjectId())) {
-            throw new BagRequestException("Task States should has equals project_id");
-        }
-        if (Objects.equals(taskStateDTO1.getId(), taskStateDTO2.getId())) {
-            throw new BagRequestException("Task States should has different id");
-        }
-        if (Objects.equals(taskStateDTO1.getId(), id)) {
-            throw new BagRequestException("Task States must belong to the project with id " + id);
-        }
-
-        TaskStateEntity taskState1 = ModelMapper.getTaskState(taskStateDTO1, projectService);
-        TaskStateEntity taskState2 = ModelMapper.getTaskState(taskStateDTO2, projectService);
-
-        setOrder(taskState1, taskState2);
-
-        List<TaskStateEntity> list = List.of(taskStateService.update(taskState1.getId(), taskState1),
-                taskStateService.update(taskState2.getId(), taskState2));
-
-        return ResponseEntity
-                .ok()
-                .body(list.stream()
-                        .map(ModelMapper::getTaskStateDTO).collect(Collectors.toList()));
     }
 
     // TODO: 022 добавить смену порядка при удалении
@@ -195,25 +158,5 @@ public class TaskStateController extends MainController {
                     "There is no Task State with id %d in Project with id %d", taskStateId, projectId));
         }
     }
-
-    private void setOrder(TaskStateEntity taskState1, TaskStateEntity taskState2) {
-        int order = taskState1.getOrder();
-        taskState1.setOrder(taskState2.getOrder());
-        taskState2.setOrder(order);
-    }
 }
 
-/*
-if (!Objects.equals(update.getOrder(), taskState.getOrder())){
-            // TODO: 020 можем поменять им order прямо тут, вопрос в транзакции
-            Optional<TaskStateEntity> optional =
-                    taskStateService.findTaskStateEntityByOrderAndProject(update.getOrder(), project);
-
-            if (optional.isPresent()){
-                optional.get().setOrder(taskState.getOrder());
-                taskStateService.save(optional.get());
-            }else {
-                throw new NotFoundException("Не найдена стопка с id " + update.getOrder());
-            }
-        }
-*/

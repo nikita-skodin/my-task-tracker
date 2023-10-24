@@ -2,6 +2,7 @@ package com.skodin.controllers;
 
 import com.skodin.DTO.ErrorDTO;
 import com.skodin.exceptions.BagRequestException;
+import com.skodin.models.TaskStateEntity;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,20 @@ public abstract class MainController {
                 .status(400)
                 .body(new ErrorDTO("BAD_REQUEST", response.toString()));
 
+    }
+
+    public void linksTaskStates(TaskStateEntity state1, TaskStateEntity state2){
+
+        if(state1 == null && state2 == null){
+            throw new IllegalArgumentException("Both TaskStates cannot be null");
+        } else if (state1 == null){
+            state2.setPreviousTaskState(null);
+        } else if (state2 == null) {
+            state1.setNextTaskState(null);
+        } else {
+            state1.setNextTaskState(state2);
+            state2.setPreviousTaskState(state1);
+        }
     }
 
 }

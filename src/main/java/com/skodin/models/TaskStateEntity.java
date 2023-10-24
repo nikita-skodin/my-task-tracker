@@ -10,12 +10,12 @@ import lombok.experimental.FieldDefaults;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
 @Setter
 @Builder
-@ToString(exclude = {"taskEntities", "project"})
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -31,10 +31,13 @@ public class TaskStateEntity {
             message = "name`s length should be between 3 and 20 chars")
     String name;
 
-    @NotNull(message = "order should not be empty")
-    @Column(name = "\"order\"")
-    // TODO: 019  добавить проверку на уникальность номера учитывая проект
-    Integer order;
+    @ManyToOne
+    @JoinColumn(name = "previous_task_state_id")
+    TaskStateEntity previousTaskState;
+
+    @ManyToOne
+    @JoinColumn(name = "next_task_state_id")
+    TaskStateEntity nextTaskState;
 
     @Builder.Default
     Instant createdAt = Instant.now();
@@ -46,4 +49,25 @@ public class TaskStateEntity {
     @Builder.Default
     @OneToMany(mappedBy = "taskStateEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     List<TaskEntity> taskEntities = new ArrayList<>();
+
+    public Optional<TaskStateEntity> getPreviousTaskState(){
+        return Optional.ofNullable(previousTaskState);
+    }
+
+    public Optional<TaskStateEntity> getNextTaskState(){
+        return Optional.ofNullable(nextTaskState);
+    }
+
+    @Override
+    public String toString() {
+        return "TaskStateEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", previousTaskStateId=" + previousTaskState +
+                ", nextTaskStateId=" + nextTaskState.getId() +
+                ", createdAt=" + createdAt +
+                ", projectId=" + project.getId() +
+                ", taskEntities=" + taskEntities +
+                '}';
+    }
 }

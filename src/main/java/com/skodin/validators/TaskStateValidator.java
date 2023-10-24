@@ -31,7 +31,6 @@ public class TaskStateValidator implements Validator {
 
         String name = taskStateEntity.getName();
         ProjectEntity project = taskStateEntity.getProject();
-        Integer order = taskStateEntity.getOrder();
 
         Optional<TaskStateEntity> entityByNameAndProject = taskStateService
                 .findTaskStateEntityByNameAndProject(name, project);
@@ -41,17 +40,6 @@ public class TaskStateValidator implements Validator {
             errors.rejectValue("name", "400",
                     String.format("Task State with name %s is already exist in project with id %d",
                             name, project.getId()));
-        }
-
-        Optional<TaskStateEntity> entityByOrderAndProject =
-                taskStateService.findTaskStateEntityByOrderAndProject(order, project);
-
-        if (entityByOrderAndProject.isPresent() &&
-                !Objects.equals(entityByOrderAndProject.get().getId(), taskStateEntity.getId())){
-
-            errors.rejectValue("order", "400",
-                    String.format("Task State with order %d is already exist in project with id %d",
-                            order, project.getId()));
         }
 
     }

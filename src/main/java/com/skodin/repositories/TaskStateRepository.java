@@ -10,11 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface TaskStateRepository extends JpaRepository<TaskStateEntity, Long> {
-
     Optional<TaskStateEntity> findTaskStateEntityByNameAndProject(String name, ProjectEntity project);
 
-    int countAllByProjectId(Long projectId);
+    Optional<TaskStateEntity> findTaskStateEntityByPreviousTaskStateNullAndProject(ProjectEntity project);
+    Optional<TaskStateEntity> findTaskStateEntityByNextTaskStateNullAndProject(ProjectEntity project);
+    Optional<TaskStateEntity> findTaskStateEntityByPreviousTaskState(TaskStateEntity previousTaskState);
+    Optional<TaskStateEntity> findTaskStateEntityByNextTaskState(TaskStateEntity previousTaskState);
 
-    Optional<TaskStateEntity> findTaskStateEntityByOrderAndProject(Integer order, ProjectEntity project);
 }
 

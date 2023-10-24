@@ -1,16 +1,13 @@
 package com.skodin.controllers;
 
-import com.skodin.DTO.ErrorDTO;
 import com.skodin.DTO.ProjectDTO;
 import com.skodin.exceptions.BagRequestException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.services.ProjectService;
+import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -18,23 +15,21 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/projects")
-public class ProjectController extends MainController{
+public class ProjectController extends MainController {
 
     ProjectService projectService;
+    TaskStateService taskStateService;
     ProjectValidator projectValidator;
 
     public static final String CREATE_PROJECT = "";
@@ -45,11 +40,11 @@ public class ProjectController extends MainController{
 
     @GetMapping(GET_PROJECTS)
     public ResponseEntity<List<ProjectDTO>> getProjects(
-            @RequestParam(required = false) Optional<String> prefix){
+            @RequestParam(required = false) Optional<String> prefix) {
 
         List<ProjectEntity> all;
 
-        if (prefix.isPresent()){
+        if (prefix.isPresent()) {
             all = projectService.findAllByNameStartingWith(prefix.get().trim()); // вместо проверки просто trim
         } else {
             all = projectService.findAll();
@@ -61,7 +56,7 @@ public class ProjectController extends MainController{
     }
 
     @GetMapping(GET_PROJECT_BY_ID)
-    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id){
+    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
         return ResponseEntity
                 .ok()
                 .body(ModelMapper.getProjectDTO(projectService.findById(id)));
@@ -74,11 +69,10 @@ public class ProjectController extends MainController{
     @SneakyThrows
     @PostMapping(CREATE_PROJECT)
     public ResponseEntity<ProjectDTO> createProject(
-            @Valid @RequestBody ProjectDTO projectDTO,
+            @RequestBody ProjectDTO projectDTO,
             BindingResult bindingResult
-    ){
-        // TODO: 020 по сути валидация дто не нужна так как она срабатывает на методе validate когда мы уже замапили dto
-        if (projectDTO.getId() != null){
+    ) {
+        if (projectDTO.getId() != null) {
             throw new BagRequestException("New Project cannot has an id");
         }
 
@@ -104,9 +98,9 @@ public class ProjectController extends MainController{
      */
     @PatchMapping(UPDATE_PROJECT_BY_ID)
     public ResponseEntity<ProjectDTO> updateProject(
-            @Valid @RequestBody ProjectDTO projectDTO,
+            @RequestBody ProjectDTO projectDTO,
             @PathVariable Long id,
-            BindingResult bindingResult){
+            BindingResult bindingResult) {
 
         ProjectEntity project = ModelMapper.getProject(projectDTO);
 
@@ -121,19 +115,25 @@ public class ProjectController extends MainController{
     }
 
     @DeleteMapping(DELETE_PROJECT_BY_ID)
-    public ResponseEntity<HttpStatus> deleteProjectById(@PathVariable Long id){
+    public ResponseEntity<HttpStatus> deleteProjectById(@PathVariable Long id) {
 
         projectService.deleteById(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void addStates(ProjectEntity project){
-        project.addProjectEntities(
-                TaskStateEntity.builder().name("To do").order(0).build(),
-                TaskStateEntity.builder().name("In progress").order(1).build(),
-                TaskStateEntity.builder().name("Done").order(2).build());
-    }
+    private void addStates(ProjectEntity project) {
 
+        TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder().name("To do").build());
+        TaskStateEntity inProgress =  taskStateService.saveAndFlush(TaskStateEntity.builder().name("In progress").build());
+        TaskStateEntity done =  taskStateService.saveAndFlush(TaskStateEntity.builder().name("Done").build());
+
+        linksTaskStates(toDo, inProgress);
+        linksTaskStates(inProgress, done);
+
+        // TODO: 023 разобраться почему криво возвращает
+
+        project.addProjectEntities(toDo, inProgress, done);
+    }
 }
 
