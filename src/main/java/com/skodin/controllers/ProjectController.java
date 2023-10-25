@@ -81,9 +81,10 @@ public class ProjectController extends MainController {
         projectValidator.validate(project, bindingResult);
         checkBindingResult(bindingResult);
 
-        addStates(project);
 
         ProjectEntity projectEntity = projectService.saveAndFlush(project);
+
+        addStates(project);
 
         ProjectDTO projectDTO1 = ModelMapper.getProjectDTO(projectEntity);
 
@@ -124,12 +125,12 @@ public class ProjectController extends MainController {
 
     private void addStates(ProjectEntity project) {
 
-        TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder().name("To do").build());
-        TaskStateEntity inProgress =  taskStateService.saveAndFlush(TaskStateEntity.builder().name("In progress").build());
-        TaskStateEntity done =  taskStateService.saveAndFlush(TaskStateEntity.builder().name("Done").build());
-
-        linksTaskStates(toDo, inProgress);
-        linksTaskStates(inProgress, done);
+        TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder()
+                .project(project).name("To do").build());
+        TaskStateEntity inProgress =  taskStateService.saveAndFlush(TaskStateEntity.builder()
+                .project(project).name("In progress").build());
+        TaskStateEntity done =  taskStateService.saveAndFlush(TaskStateEntity.builder()
+                .project(project).name("Done").build());
 
         // TODO: 023 разобраться почему криво возвращает
 

@@ -18,17 +18,32 @@ public class ModelMapper {
     }
 
     public static ProjectDTO getProjectDTO (ProjectEntity project){
-        return modelMapper.map(project, ProjectDTO.class);
+
+        /*можно ли  переопределить метод  map для объекта ModelMapper в java */
+
+        ProjectDTO map = modelMapper.map(project, ProjectDTO.class);
+
+        // мапит встроенной map для dto отсюда и ошибка
+
+        System.err.println(map);
+
+        return map;
     }
 
     public static ProjectEntity getProject (ProjectDTO projectDTO){
-        return modelMapper.map(projectDTO, ProjectEntity.class);
+
+        ProjectEntity map = modelMapper.map(projectDTO, ProjectEntity.class);
+
+        return map;
     }
 
     public static TaskStateDTO getTaskStateDTO (TaskStateEntity entity){
         TaskStateDTO map = modelMapper.map(entity, TaskStateDTO.class);
-        map.setPreviousTaskStateId(entity.getPreviousTaskState().map(TaskStateEntity::getId).orElse(null));
-        map.setNextTaskStateId(entity.getNextTaskState().map(TaskStateEntity::getId).orElse(null));
+        entity.getPreviousTaskState().ifPresent(s -> map.setPreviousTaskStateId(s.getId()));
+        entity.getNextTaskState().ifPresent(s -> map.setNextTaskStateId(s.getId()));
+
+        System.err.println(map);
+
         return map;
     }
 

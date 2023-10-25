@@ -63,10 +63,9 @@ public class TaskStateEntity {
         return "TaskStateEntity{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", previousTaskStateId=" + previousTaskState +
-                ", nextTaskStateId=" + nextTaskState.getId() +
+                ", previousTaskStateId=" + (previousTaskState == null ? null : previousTaskState.getId()) +
+                ", nextTaskStateId=" + (nextTaskState == null ? null : nextTaskState.getId()) +
                 ", createdAt=" + createdAt +
-                ", projectId=" + project.getId() +
                 ", taskEntities=" + taskEntities +
                 '}';
     }

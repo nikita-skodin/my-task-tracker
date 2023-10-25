@@ -29,8 +29,25 @@ public class TaskStateService {
                 .orElseThrow(() -> new NotFoundException("Task State with id " + aLong + " did not found"));
     }
 
+
+    /**
+     * Добавляет стопку в конец
+     */
     @Transactional
     public <S extends TaskStateEntity> S saveAndFlush(S entity) {
+
+        Optional<TaskStateEntity> lastState = taskStateRepository
+                .findTaskStateEntityByNextTaskStateNullAndProject(entity.getProject());
+
+        if (lastState.isPresent()){
+            lastState.get().setNextTaskState(entity);
+            entity.setPreviousTaskState(lastState.get());
+            entity.setNextTaskState(null);
+        }else {
+            entity.setPreviousTaskState(null);
+            entity.setNextTaskState(null);
+        }
+
         return taskStateRepository.saveAndFlush(entity);
     }
 
@@ -69,10 +86,11 @@ public class TaskStateService {
                     stateFromDB.setNextTaskState(firstState.get());
                     firstState.get().setPreviousTaskState(stateFromDB);
 
-                    saveAndFlush(firstState.get());
+                    taskStateRepository.saveAndFlush(firstState.get());
                 } else {
                     // логика если он первый и единственный
                     // по идее этот кейс никогда не сработает
+                    // TODO: 024 проверить это при добавлении
                     throw new BagRequestException("There is no other elements");
                 }
             } else {
@@ -93,7 +111,7 @@ public class TaskStateService {
                         lastState.get().setNextTaskState(stateFromDB);
                         stateFromDB.setPreviousTaskState(lastState.get());
 
-                        saveAndFlush(lastState.get());
+                        taskStateRepository.saveAndFlush(lastState.get());
                     } else {
                         // логика если он первый и единственный
                         throw new BagRequestException("There is no other elements");
@@ -110,8 +128,8 @@ public class TaskStateService {
                     stateFromDB.setPreviousTaskState(previousFromUrl);
                     previousFromUrl.setNextTaskState(stateFromDB);
 
-                    saveAndFlush(previousFromUrl);
-                    saveAndFlush(workElement);
+                    taskStateRepository.saveAndFlush(previousFromUrl);
+                    taskStateRepository.saveAndFlush(workElement);
                 }
             }
         }
@@ -119,7 +137,7 @@ public class TaskStateService {
         stateFromDB.setName(stateFromURl.getName());
         stateFromDB.setCreatedAt(stateFromURl.getCreatedAt());
 
-        return saveAndFlush(stateFromDB);
+        return taskStateRepository.saveAndFlush(stateFromDB);
     }
 
     @Transactional

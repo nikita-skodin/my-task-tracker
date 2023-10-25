@@ -28,9 +28,9 @@ public class TaskStateDTO {
     String name;
 
 
-    @JsonProperty("previous_task_stateId")
+    @JsonProperty("previous_task_state_id")
     Long previousTaskStateId;
-    @JsonProperty("next_task_stateId")
+    @JsonProperty("next_task_state_id")
     Long nextTaskStateId;
 
     @Builder.Default

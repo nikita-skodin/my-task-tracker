@@ -104,14 +104,9 @@ public class TaskStateController extends MainController {
     }
 
     /**
-     * Берет все поля из DTO,
-     * для добавления нового task лучше использовать другой url
-     * order должен оставаться неизменным, потом пофиксим
+     * для добавления нового task использовать другой url
      */
     @PatchMapping(UPDATE_TASK_STATE_BY_ID)
-    // TODO: 020 добавить изменение связей
-    // TODO: 022 так же при этом сделать проверку на то, что обе стопки принадлежат одному проекту
-    // TODO: 023 создавать стопку можно только в конце по логике проекта, добавить поддержку этого в метод create
     public ResponseEntity<TaskStateDTO> updateProject(
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
