@@ -1,14 +1,13 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskStateDTO;
-import com.skodin.exceptions.BagRequestException;
+import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.TaskStateValidator;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -82,7 +81,7 @@ public class TaskStateController extends MainController {
             @PathVariable("project_id") Long id) {
 
         if (taskStateDTO.getId() != null) {
-            throw new BagRequestException("New Task State cannot has an id");
+            throw new BadRequestException("New Task State cannot has an id");
         }
 
         taskStateDTO.setProjectId(id);
@@ -114,7 +113,7 @@ public class TaskStateController extends MainController {
             @PathVariable("project_id") Long projectId){
 
         if (!Objects.equals(projectId, taskStateDTO.getProjectId())){
-            throw new BagRequestException("You can not change project for Task States");
+            throw new BadRequestException("You can not change project for Task States");
         }
 
         taskStateDTO.setId(taskStateId);

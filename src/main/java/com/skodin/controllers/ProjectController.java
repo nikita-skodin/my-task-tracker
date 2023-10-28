@@ -1,7 +1,7 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.ProjectDTO;
-import com.skodin.exceptions.BagRequestException;
+import com.skodin.exceptions.BadRequestException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.services.ProjectService;
@@ -73,7 +73,7 @@ public class ProjectController extends MainController {
             BindingResult bindingResult
     ) {
         if (projectDTO.getId() != null) {
-            throw new BagRequestException("New Project cannot has an id");
+            throw new BadRequestException("New Project cannot has an id");
         }
 
         ProjectEntity project = ModelMapper.getProject(projectDTO);

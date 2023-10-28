@@ -1,8 +1,6 @@
 package com.skodin.validators;
 
-import com.skodin.exceptions.BagRequestException;
 import com.skodin.models.ProjectEntity;
-import com.skodin.models.TaskEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.services.TaskStateService;
 import lombok.RequiredArgsConstructor;

@@ -27,7 +27,6 @@ public class TaskStateDTO {
 
     String name;
 
-
     @JsonProperty("previous_task_state_id")
     Long previousTaskStateId;
     @JsonProperty("next_task_state_id")

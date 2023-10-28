@@ -1,7 +1,7 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskDTO;
-import com.skodin.exceptions.BagRequestException;
+import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
@@ -12,7 +12,6 @@ import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.util.ProjectTaskStateTuple;
 import com.skodin.validators.TaskValidator;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -120,7 +119,7 @@ public class TaskController extends MainController {
             BindingResult bindingResult) {
 
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
-           throw new BagRequestException("Id in DTO and in url must be the same");    //???
+           throw new BadRequestException("Id in DTO and in url must be the same");    //???
         }
 
         taskDTO.setId(taskId);

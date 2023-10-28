@@ -1,6 +1,6 @@
 package com.skodin.services;
 
-import com.skodin.exceptions.BagRequestException;
+import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
@@ -67,7 +67,7 @@ public class TaskStateService {
         if (!Objects.equals(previousStateFromDB, previousStateFromURL)) {
 
             if (previousStateFromURL != null && !Objects.equals(previousStateFromURL.getProject(), stateFromDB.getProject())) {
-                throw new BagRequestException("Projects should not be different");
+                throw new BadRequestException("Projects should not be different");
             }
 
             TaskStateEntity previousFromUrl = stateFromURl.getPreviousTaskState().orElse(null);
@@ -91,7 +91,7 @@ public class TaskStateService {
                     // логика если он первый и единственный
                     // по идее этот кейс никогда не сработает
                     // TODO: 024 проверить это при добавлении
-                    throw new BagRequestException("There is no other elements");
+                    throw new BadRequestException("There is no other elements");
                 }
             } else {
                 TaskStateEntity workElement = previousFromUrl.getNextTaskState().orElse(null);
@@ -114,7 +114,7 @@ public class TaskStateService {
                         taskStateRepository.saveAndFlush(lastState.get());
                     } else {
                         // логика если он первый и единственный
-                        throw new BagRequestException("There is no other elements");
+                        throw new BadRequestException("There is no other elements");
                     }
 
                 } else {

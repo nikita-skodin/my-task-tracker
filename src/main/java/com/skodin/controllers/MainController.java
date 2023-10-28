@@ -1,7 +1,7 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.ErrorDTO;
-import com.skodin.exceptions.BagRequestException;
+import com.skodin.exceptions.BadRequestException;
 import com.skodin.models.TaskStateEntity;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -20,7 +20,7 @@ public abstract class MainController {
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             for (var error: allErrors) {
                 if (Objects.equals(error.getCode(), "400")){
-                    throw new BagRequestException(error.getDefaultMessage());
+                    throw new BadRequestException(error.getDefaultMessage());
                 }
             }
         }
