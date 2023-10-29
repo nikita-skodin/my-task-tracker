@@ -1,5 +1,6 @@
 package com.skodin.controllers;
 
+import com.skodin.DTO.ProjectDTO;
 import com.skodin.DTO.TaskStateDTO;
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
@@ -8,6 +9,12 @@ import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.TaskStateValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -36,17 +43,30 @@ public class TaskStateController extends MainController {
     TaskStateService taskStateService;
     TaskStateValidator taskStateValidator;
 
-    public static final String GET_ALL_TASK_STATES = "";
-    public static final String CREATE_TASK_STATE = "";
-    public static final String GET_TASK_STATE_BY_ID = "/{task-state_id}";
-    public static final String UPDATE_TASK_STATE_BY_ID = "/{task-state_id}";
-    public static final String DELETE_TASK_STATE_BY_ID = "/{task-state_id}";
+    public static final String GET_ALL_TASK_STATES = "/get";
+    public static final String CREATE_TASK_STATE = "/create";
+    public static final String GET_TASK_STATE_BY_ID = "/get/{task-state_id}";
+    public static final String UPDATE_TASK_STATE_BY_ID = "/update/{task-state_id}";
+    public static final String DELETE_TASK_STATE_BY_ID = "/delete/{task-state_id}";
 
     @GetMapping(GET_ALL_TASK_STATES)
+    @Operation(
+            summary = "Get all Task States for project by project id",
+            description = "Returns all Task States for project",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation")
+            }
+    )
     public ResponseEntity<List<TaskStateDTO>> getAllTaskStates(@PathVariable("project_id") Long id) {
 
         List<TaskStateEntity> taskStateEntities = projectService.findById(id).getTaskStateEntities();
-
+        // TODO: 029 должен возвращать вместе с тасками
         return ResponseEntity
                 .ok()
                 .body(taskStateEntities.stream()
@@ -55,6 +75,25 @@ public class TaskStateController extends MainController {
     }
 
     @GetMapping(GET_TASK_STATE_BY_ID)
+    @Operation(
+            summary = "Get Task State for project by project id and task state id",
+            description = "Returns Task State for project",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
     public ResponseEntity<TaskStateDTO> getTaskState(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-state_id") Long taskStateId) {
@@ -66,15 +105,34 @@ public class TaskStateController extends MainController {
         return ResponseEntity
                 .ok()
                 .body(ModelMapper.getTaskStateDTO(taskStateEntity));
-
     }
 
-    /**
-     * id назначаются автоматически
-     * создается пустая стопка
-     */
     @SneakyThrows
     @PostMapping(CREATE_TASK_STATE)
+    @Operation(
+            summary = "Create Task State for project by project id and task state id",
+            description = "Returns new Task State",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "empty JSON taskStateDTO",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TaskStateDTO.class))),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     public ResponseEntity<TaskStateDTO> createTaskState(
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
@@ -82,6 +140,10 @@ public class TaskStateController extends MainController {
 
         if (taskStateDTO.getId() != null) {
             throw new BadRequestException("New Task State cannot has an id");
+        }
+
+        if (!taskStateDTO.getTaskEntities().isEmpty()) {
+            throw new BadRequestException("New Task State cannot has any tasks");
         }
 
         taskStateDTO.setProjectId(id);
@@ -102,10 +164,33 @@ public class TaskStateController extends MainController {
 
     }
 
-    /**
-     * для добавления нового task использовать другой url
-     */
     @PatchMapping(UPDATE_TASK_STATE_BY_ID)
+    @Operation(
+            summary = "Update Task State for project by project id and task state id",
+            description = "Returns updated Task State with Tasks. Updates all fields, but if you " +
+                    "want to update order, you should change only previous element" +
+                    "For adding new Task see TaskController",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "JSON taskStateDTO",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TaskStateDTO.class))),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     public ResponseEntity<TaskStateDTO> updateProject(
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
@@ -131,12 +216,31 @@ public class TaskStateController extends MainController {
                 .body(ModelMapper.getTaskStateDTO(update));
     }
 
-    // TODO: 022 добавить смену порядка при удалении
     @DeleteMapping(DELETE_TASK_STATE_BY_ID)
+    @Operation(
+            summary = "Delete Task State for project by project id and task state id",
+            description = "Delete Task State for project by project id and task state id",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad Request"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
     public ResponseEntity<HttpStatus> deleteTasStateById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-state_id") Long taskStateId){
-
+        // TODO: 022 добавить смену порядка при удалении
         TaskStateEntity byId = taskStateService.findById(taskStateId);
 
         taskStateInProjectOrThrowEx(taskStateId, projectId, byId);

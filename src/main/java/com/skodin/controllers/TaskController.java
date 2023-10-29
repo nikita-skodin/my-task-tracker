@@ -1,6 +1,7 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskDTO;
+import com.skodin.DTO.TaskStateDTO;
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
@@ -12,6 +13,12 @@ import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.util.ProjectTaskStateTuple;
 import com.skodin.validators.TaskValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -37,24 +44,118 @@ public class TaskController extends MainController {
 
     TaskValidator taskValidator;
 
-    public static final String ADD_NEW_TASK = "";
-    public static final String GET_ALL_TASKS = "";
-    public static final String GET_TASK_BY_ID = "/{task_id}";
-    public static final String DELETE_TASK_BY_ID = "/{task_id}";
-    public static final String UPDATE_TASK_BY_ID = "/{task_id}";
+    public static final String GET_ALL_TASKS = "/get";
+    public static final String ADD_NEW_TASK = "/create";
+    public static final String GET_TASK_BY_ID = "/get/{task_id}";
+    public static final String UPDATE_TASK_BY_ID = "/update/{task_id}";
+    public static final String DELETE_TASK_BY_ID = "/delete/{task_id}";
+
+    @GetMapping(GET_ALL_TASKS)
+    @Operation(
+            summary = "Get Tasks for Task State by project id and task state id",
+            description = "Returns all Tasks",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation")
+            }
+    )
+    public ResponseEntity<List<TaskDTO>> getTasks(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-states_id") Long taskStateId) {
 
 
-    /**
-     * в дто надо только название и содержание
-     */
+        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
+
+        List<TaskEntity> taskEntities = tuple.getTaskState().getTaskEntities();
+
+        return ResponseEntity
+                .ok()
+                .body(taskEntities.stream()
+                        .map(ModelMapper::getTaskDTO).collect(Collectors.toList()));
+
+    }
+
+    @GetMapping(GET_TASK_BY_ID)
+    @Operation(
+            summary = "Get Tasks for Task State by project id, task state id and task id",
+            description = "Returns all Tasks",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task_id",
+                            description = "task id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    public ResponseEntity<TaskDTO> getTaskById(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("task-states_id") Long taskStateId,
+            @PathVariable("task_id") Long taskId) {
+
+        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
+
+        TaskEntity taskEntity = taskService.findById(taskId);
+
+        return ResponseEntity
+                .ok()
+                .body(ModelMapper.getTaskDTO(taskEntity));
+    }
+
     @SneakyThrows
     @PostMapping(ADD_NEW_TASK)
+    @Operation(
+            summary = "Create Task for Task State",
+            description = "Create new Task",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "empty JSON taskDTO",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TaskDTO.class))),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     public ResponseEntity<TaskDTO> createTask(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-
 
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
@@ -73,44 +174,32 @@ public class TaskController extends MainController {
 
     }
 
-    @GetMapping(GET_ALL_TASKS)
-    public ResponseEntity<List<TaskDTO>> getTasks(
-            @PathVariable("project_id") Long projectId,
-            @PathVariable("task-states_id") Long taskStateId) {
-
-
-        ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
-
-        List<TaskEntity> taskEntities = tuple.getTaskState().getTaskEntities();
-
-        return ResponseEntity
-                .ok()
-                .body(taskEntities.stream()
-                        .map(ModelMapper::getTaskDTO).collect(Collectors.toList()));
-
-    }
-
-    @GetMapping(GET_TASK_BY_ID)
-    public ResponseEntity<TaskDTO> getTaskById(
-            @PathVariable("project_id") Long projectId,
-            @PathVariable("task-states_id") Long taskStateId,
-            @PathVariable("task_id") Long taskId) {
-
-        checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
-
-        TaskEntity taskEntity = taskService.findById(taskId);
-
-        return ResponseEntity
-                .ok()
-                .body(ModelMapper.getTaskDTO(taskEntity));
-
-    }
-
-
-    /**
-     * Менять можно все
-     */
     @PatchMapping(UPDATE_TASK_BY_ID)
+    @Operation(
+            summary = "Update Task",
+            description = "Returns updated Task",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task_id",
+                            description = "task id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
     public ResponseEntity<TaskDTO> updateTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
@@ -119,7 +208,7 @@ public class TaskController extends MainController {
             BindingResult bindingResult) {
 
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
-           throw new BadRequestException("Id in DTO and in url must be the same");    //???
+           throw new BadRequestException("Id in DTO and in url must be the same");
         }
 
         taskDTO.setId(taskId);
@@ -137,8 +226,32 @@ public class TaskController extends MainController {
                 .body(ModelMapper.getTaskDTO(updated));
     }
 
-
     @DeleteMapping(DELETE_TASK_BY_ID)
+    @Operation(
+            summary = "Delete Task",
+            description = "Delete Task",
+            parameters = {
+                    @Parameter(
+                            name = "project_id",
+                            description = "project id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task-state_id",
+                            description = "task state id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long")),
+                    @Parameter(
+                            name = "task_id",
+                            description = "task id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
     public ResponseEntity<HttpStatus> deleteTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
@@ -152,9 +265,9 @@ public class TaskController extends MainController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // TODO: 022  можно пойти от обратного и забирать из геттеров у task объекты и проверять их,
-    //  так мы оптимизируем работу с бд
     private ProjectTaskStateTuple checkTaskStateInProjectOrThrowEx(Long projectId, Long taskStateId, Long taskId) {
+        // TODO: 022  можно пойти от обратного и забирать из геттеров у task объекты и проверять их,
+        //  так мы оптимизируем работу с бд
         ProjectEntity project = projectService.findById(projectId);
         TaskStateEntity taskState = taskStateService.findById(taskStateId);
 

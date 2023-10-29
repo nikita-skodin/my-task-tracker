@@ -8,11 +8,20 @@ import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -26,20 +35,34 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/projects")
+@Tag(name = "Projects", description = "Operations related to projects")
 public class ProjectController extends MainController {
 
     ProjectService projectService;
     TaskStateService taskStateService;
     ProjectValidator projectValidator;
 
-    public static final String CREATE_PROJECT = "";
-    public static final String GET_PROJECTS = "";
-    public static final String GET_PROJECT_BY_ID = "/{id}";
-    public static final String UPDATE_PROJECT_BY_ID = "/{id}";
-    public static final String DELETE_PROJECT_BY_ID = "/{id}";
+    public static final String GET_PROJECTS = "/get";
+    public static final String CREATE_PROJECT = "/create";
+    public static final String GET_PROJECT_BY_ID = "/get/{id}";
+    public static final String UPDATE_PROJECT_BY_ID = "/update/{id}";
+    public static final String DELETE_PROJECT_BY_ID = "/delete/{id}";
 
     @GetMapping(GET_PROJECTS)
-    public ResponseEntity<List<ProjectDTO>> getProjects(
+    @Operation(
+            summary = "Get all projects",
+            description = "Returns all project without Task States",
+            parameters = {
+                    @Parameter(
+                            name = "prefix",
+                            description = "project name`s prefix",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation")
+            }
+    )
+    public ResponseEntity<List<ProjectDTO>> getAllProjects(
             @RequestParam(required = false) Optional<String> prefix) {
 
         List<ProjectEntity> all;
@@ -49,23 +72,48 @@ public class ProjectController extends MainController {
         } else {
             all = projectService.findAll();
         }
-
+        // TODO: 029 добавить ленивую загрузку
         return ResponseEntity
                 .ok()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(all.stream().map(ModelMapper::getProjectDTO).collect(Collectors.toList()));
     }
 
+    @Operation(
+            summary = "Get project by id",
+            description = "Returns project by id",
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "project`s id",
+                            in = ParameterIn.QUERY,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
     @GetMapping(GET_PROJECT_BY_ID)
     public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
         return ResponseEntity
                 .ok()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(ModelMapper.getProjectDTO(projectService.findById(id)));
     }
 
-
-    /**
-     * Передается пустой project после создания
-     */
+    @Operation(
+            summary = "Create new project",
+            description = "Returns new project DTO with 3 empty Task States DTO",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "empty JSON projectDTO",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDTO.class))),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Successfully created"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     @SneakyThrows
     @PostMapping(CREATE_PROJECT)
     public ResponseEntity<ProjectDTO> createProject(
@@ -74,6 +122,9 @@ public class ProjectController extends MainController {
     ) {
         if (projectDTO.getId() != null) {
             throw new BadRequestException("New Project cannot has an id");
+        }
+        if (!projectDTO.getTaskStateEntities().isEmpty()) {
+            throw new BadRequestException("New Project cannot has any Task States");
         }
 
         ProjectEntity project = ModelMapper.getProject(projectDTO);
@@ -90,13 +141,30 @@ public class ProjectController extends MainController {
 
         return ResponseEntity
                 .created(new URI("/api/projects/" + projectDTO1.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(projectDTO1);
     }
 
-    /**
-     * берет все поля из DTO,
-     * для добавления нового state лучше использовать другой url
-     */
+    @Operation(
+            summary = "Update project by id",
+            description = "Returns updated project with Task States. Updates all fields. " +
+                    "For adding new Task States see TaskStateController",
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "project`s id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "empty JSON projectDTO",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDTO.class))),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     @PatchMapping(UPDATE_PROJECT_BY_ID)
     public ResponseEntity<ProjectDTO> updateProject(
             @RequestBody ProjectDTO projectDTO,
@@ -109,17 +177,30 @@ public class ProjectController extends MainController {
         checkBindingResult(bindingResult);
 
         ProjectEntity update = projectService.update(id, project);
-
+// TODO: 029 тут стопки надо возвращать
         return ResponseEntity
                 .ok()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(ModelMapper.getProjectDTO(update));
     }
 
+    @Operation(
+            summary = "Delete project by id",
+            description = "Delete project by id",
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "project`s id",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "long"))},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful operation"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     @DeleteMapping(DELETE_PROJECT_BY_ID)
     public ResponseEntity<HttpStatus> deleteProjectById(@PathVariable Long id) {
-
         projectService.deleteById(id);
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -127,9 +208,9 @@ public class ProjectController extends MainController {
 
         TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("To do").build());
-        TaskStateEntity inProgress =  taskStateService.saveAndFlush(TaskStateEntity.builder()
+        TaskStateEntity inProgress = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("In progress").build());
-        TaskStateEntity done =  taskStateService.saveAndFlush(TaskStateEntity.builder()
+        TaskStateEntity done = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("Done").build());
 
         // TODO: 023 разобраться почему криво возвращает

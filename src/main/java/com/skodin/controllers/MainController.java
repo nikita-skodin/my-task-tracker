@@ -42,19 +42,4 @@ public abstract class MainController {
                 .body(new ErrorDTO("BAD_REQUEST", response.toString()));
 
     }
-
-    public void linksTaskStates(TaskStateEntity state1, TaskStateEntity state2){
-
-        if(state1 == null && state2 == null){
-            throw new IllegalArgumentException("Both TaskStates cannot be null");
-        } else if (state1 == null){
-            state2.setPreviousTaskState(null);
-        } else if (state2 == null) {
-            state1.setNextTaskState(null);
-        } else {
-            state1.setNextTaskState(state2);
-            state2.setPreviousTaskState(state1);
-        }
-    }
-
 }

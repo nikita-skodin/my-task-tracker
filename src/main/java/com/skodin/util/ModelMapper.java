@@ -25,7 +25,7 @@ public class ModelMapper {
 
         // мапит встроенной map для dto отсюда и ошибка
 
-        System.err.println(map);
+//        System.err.println(map);
 
         return map;
     }
