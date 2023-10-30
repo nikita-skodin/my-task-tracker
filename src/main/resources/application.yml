@@ -1,0 +1,12 @@
+spring:
+  config:
+    import: file:.env[.properties]
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driverClassName: ${DRIVER}
+    url: ${URL}
+  liquibase:
+    changeLog: classpath:liquibase/changelog.yml
+    defaultSchema: ${DEFAULT_SCHEMA}
+    enabled: true

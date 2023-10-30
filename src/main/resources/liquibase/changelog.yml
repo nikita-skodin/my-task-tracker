@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - includeAll:
+      - author: nikita
+      - path: /changesets
+        relativeToChangelogFile: true
