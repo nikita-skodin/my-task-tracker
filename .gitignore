@@ -5,4 +5,4 @@ target
 TT.txt
 HELP.md
 my-task-tracker.iml
-src/main/resources/application-nikita.properties
+.env
