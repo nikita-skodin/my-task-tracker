@@ -213,8 +213,6 @@ public class ProjectController extends MainController {
         TaskStateEntity done = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("Done").build());
 
-        // TODO: 023 разобраться почему криво возвращает
-
         project.addProjectEntities(toDo, inProgress, done);
     }
 }

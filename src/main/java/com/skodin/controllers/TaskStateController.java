@@ -240,13 +240,9 @@ public class TaskStateController extends MainController {
     public ResponseEntity<HttpStatus> deleteTasStateById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-state_id") Long taskStateId){
-        // TODO: 022 добавить смену порядка при удалении
         TaskStateEntity byId = taskStateService.findById(taskStateId);
-
         taskStateInProjectOrThrowEx(taskStateId, projectId, byId);
-
         taskStateService.deleteById(taskStateId);
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

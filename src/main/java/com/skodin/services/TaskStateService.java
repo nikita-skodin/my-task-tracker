@@ -90,7 +90,6 @@ public class TaskStateService {
                 } else {
                     // логика если он первый и единственный
                     // по идее этот кейс никогда не сработает
-                    // TODO: 024 проверить это при добавлении
                     throw new BadRequestException("There is no other elements");
                 }
             } else {
@@ -98,7 +97,7 @@ public class TaskStateService {
 
                 if (workElement == null) {
                     //логика добавления как последний элемент
-                    System.err.println("Добавляем в конец");
+                    System.err.println("add to the end");
 
                     Optional<TaskStateEntity> lastState = taskStateRepository
                             .findTaskStateEntityByNextTaskStateNullAndProject(stateFromDB.getProject());
@@ -119,7 +118,7 @@ public class TaskStateService {
 
                 } else {
                     // логика если меняем два обычных элемента
-                    System.err.println("Просто обновляем");
+                    System.err.println("Just add");
 
                     snatchElement(stateFromDB);
 

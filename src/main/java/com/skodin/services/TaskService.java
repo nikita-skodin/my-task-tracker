@@ -44,9 +44,8 @@ public class TaskService {
 
     @Transactional
     public void deleteById(Long aLong) {
-        TaskEntity entity = findById(aLong);// just check does object exist
+        TaskEntity entity = findById(aLong);
         entity.getTaskStateEntity().getTaskEntities().remove(entity);
-        // TODO: 022 разобраться почему тут недостаточно простого удаления в то время как в стопке этого с головой
         taskRepository.deleteById(aLong);
     }
 
