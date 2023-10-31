@@ -36,7 +36,7 @@ public class ProjectEntity {
     Instant createdAt = Instant.now();
 
     @Builder.Default
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<TaskStateEntity> taskStateEntities = new ArrayList<>();
 
     public void addProjectEntities(TaskStateEntity ... entities){

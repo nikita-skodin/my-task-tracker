@@ -66,7 +66,7 @@ public class TaskStateController extends MainController {
     public ResponseEntity<List<TaskStateDTO>> getAllTaskStates(@PathVariable("project_id") Long id) {
 
         List<TaskStateEntity> taskStateEntities = projectService.findById(id).getTaskStateEntities();
-        // TODO: 029 должен возвращать вместе с тасками
+
         return ResponseEntity
                 .ok()
                 .body(taskStateEntities.stream()

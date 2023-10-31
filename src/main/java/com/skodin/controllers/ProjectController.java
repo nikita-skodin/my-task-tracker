@@ -72,7 +72,6 @@ public class ProjectController extends MainController {
         } else {
             all = projectService.findAll();
         }
-        // TODO: 029 добавить ленивую загрузку
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -177,7 +176,6 @@ public class ProjectController extends MainController {
         checkBindingResult(bindingResult);
 
         ProjectEntity update = projectService.update(id, project);
-// TODO: 029 тут стопки надо возвращать
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MyTaskTrackerApplication {
-    // TODO: 020 добавить ленивые загрузки и тд
     public static void main(String[] args) {
         SpringApplication.run(MyTaskTrackerApplication.class, args);
     }

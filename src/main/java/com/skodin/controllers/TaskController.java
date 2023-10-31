@@ -259,15 +259,12 @@ public class TaskController extends MainController {
 
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
-        System.out.println(taskId);
         taskService.deleteById(taskId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private ProjectTaskStateTuple checkTaskStateInProjectOrThrowEx(Long projectId, Long taskStateId, Long taskId) {
-        // TODO: 022  можно пойти от обратного и забирать из геттеров у task объекты и проверять их,
-        //  так мы оптимизируем работу с бд
         ProjectEntity project = projectService.findById(projectId);
         TaskStateEntity taskState = taskStateService.findById(taskStateId);
 
