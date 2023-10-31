@@ -1,64 +1,7 @@
-Entities:
-
-project
-	taskState
-			task
-
-endPoints:
-
-Post /api/projects - добавляет новый проект (ResponseEntity<DTO>)
-Get /api/projects - возвращает все проекты (ResponseEntity<List<DTO>>)
-Get /api/projects?prefix=test - возвращает все проекты с префиксом тест (ResponseEntity<List<DTO>>)
-Get /api/projects/{id} - возвращает проект по id (ResponseEntity<DTO>)
-Patch /api/projects/{id} - обновляет проект (ResponseEntity<DTO>)
-Delete /api/projects/{id} - удаляет проект по id  (ResponseEntity.ok)
-
-Get /api/projects/{project_id}/task-states - возвращает все стопки для проекта (ResponseEntity<List<DTO>>)
-Post /api/projects/{project_id}/taks-states - добавляет новую стопку (ResponseEntity.ok)
-Patch /api/projects/{project_id}/task-states - обновляет orders стопок (ResponseEntity<DTO>)
-Get /api/projects/{project_id}/task-states/{task-states_id}- возвращает стопку по id (ResponseEntity<DTO>)
-Patch /api/projects/{project_id}/task-states/{task-states_id} - обновляет стопку (ResponseEntity<DTO>)
-Delete /api/projects/{project_id}/task-states/{task-states_id} - удаляет стопку по id  (ResponseEntity.ok)
-
-Post /apiprojects/{project_id}/taks-states/{task-states_id} - добавляет новую таску (ResponseEntity.ok)
-Get /api/projects/{project_id}/task-states/{task-states_id}/tasks - возвращает все таски для проекта (ResponseEntity<List<DTO>>)
-Get /api/projects/{project_id}/task-states/{task-states_id}/tasks/{task_id}- возвращает таску по id (ResponseEntity<DTO>)
-Patch /api/projects/{project_id}/task-states/{task-states_id}/tasks/{task_id} - обновляет таску (ResponseEntity<DTO>)
-Delete /api/projects/{project_id}/task-states/{task-states_id}/tasks/{task_id} - удаляет таску по id  (ResponseEntity.ok)
-
-Entities:
-
-Project:
-
-Long id
-
-String name
-
-Instant createdAt
-
-List<TaskState> taskStates
-
-
-TaskState:
-
-Long id
-
-String name
-
-Integer order // получаешь id одного и id второго, и просто меняешь их местами, на отдельном url
-
-Instant createdAt
-
-List<Task> tasks
-
-Task:
-
-Long id
-
-String name
-
-Instant createdAt
-
-boolean isDone
-
-String description
+Stack:
+	java 17,
+	Spring boot 3.1,
+	Spring data JPA,
+	PostgreSQL,
+	liquibase,
+	Open API.
