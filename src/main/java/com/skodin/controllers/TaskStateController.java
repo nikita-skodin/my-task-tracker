@@ -1,6 +1,5 @@
 package com.skodin.controllers;
 
-import com.skodin.DTO.ProjectDTO;
 import com.skodin.DTO.TaskStateDTO;
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
@@ -42,6 +41,7 @@ public class TaskStateController extends MainController {
     ProjectService projectService;
     TaskStateService taskStateService;
     TaskStateValidator taskStateValidator;
+    ModelMapper modelMapper;
 
     public static final String GET_ALL_TASK_STATES = "/get";
     public static final String CREATE_TASK_STATE = "/create";
@@ -70,7 +70,7 @@ public class TaskStateController extends MainController {
         return ResponseEntity
                 .ok()
                 .body(taskStateEntities.stream()
-                        .map(ModelMapper::getTaskStateDTO).collect(Collectors.toList()));
+                        .map(modelMapper::getTaskStateDTO).collect(Collectors.toList()));
 
     }
 
@@ -104,7 +104,7 @@ public class TaskStateController extends MainController {
 
         return ResponseEntity
                 .ok()
-                .body(ModelMapper.getTaskStateDTO(taskStateEntity));
+                .body(modelMapper.getTaskStateDTO(taskStateEntity));
     }
 
     @SneakyThrows
@@ -148,14 +148,14 @@ public class TaskStateController extends MainController {
 
         taskStateDTO.setProjectId(id);
 
-        TaskStateEntity taskState = ModelMapper.getTaskState(taskStateDTO, taskStateService);
+        TaskStateEntity taskState = modelMapper.getTaskState(taskStateDTO);
 
         taskStateValidator.validate(taskState, bindingResult);
         checkBindingResult(bindingResult);
 
         TaskStateEntity taskStateEntity = taskStateService.saveAndFlush(taskState);
 
-        TaskStateDTO taskStateDTO1 = ModelMapper.getTaskStateDTO(taskStateEntity);
+        TaskStateDTO taskStateDTO1 = modelMapper.getTaskStateDTO(taskStateEntity);
 
         return ResponseEntity
                 .created(new URI(String.format("/api/projects/%d/task-states/%d",
@@ -202,7 +202,7 @@ public class TaskStateController extends MainController {
         }
 
         taskStateDTO.setId(taskStateId);
-        TaskStateEntity taskStateFromHttp = ModelMapper.getTaskState(taskStateDTO, taskStateService);
+        TaskStateEntity taskStateFromHttp = modelMapper.getTaskState(taskStateDTO);
 
         taskStateInProjectOrThrowEx(taskStateId, projectId, taskStateFromHttp);
 
@@ -213,7 +213,7 @@ public class TaskStateController extends MainController {
 
         return ResponseEntity
                 .ok()
-                .body(ModelMapper.getTaskStateDTO(update));
+                .body(modelMapper.getTaskStateDTO(update));
     }
 
     @DeleteMapping(DELETE_TASK_STATE_BY_ID)

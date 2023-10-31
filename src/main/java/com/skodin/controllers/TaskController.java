@@ -1,7 +1,6 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.TaskDTO;
-import com.skodin.DTO.TaskStateDTO;
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
@@ -41,6 +40,7 @@ public class TaskController extends MainController {
     TaskService taskService;
     ProjectService projectService;
     TaskStateService taskStateService;
+    ModelMapper modelMapper;
 
     TaskValidator taskValidator;
 
@@ -81,7 +81,7 @@ public class TaskController extends MainController {
         return ResponseEntity
                 .ok()
                 .body(taskEntities.stream()
-                        .map(ModelMapper::getTaskDTO).collect(Collectors.toList()));
+                        .map(modelMapper::getTaskDTO).collect(Collectors.toList()));
 
     }
 
@@ -122,7 +122,7 @@ public class TaskController extends MainController {
 
         return ResponseEntity
                 .ok()
-                .body(ModelMapper.getTaskDTO(taskEntity));
+                .body(modelMapper.getTaskDTO(taskEntity));
     }
 
     @SneakyThrows
@@ -160,7 +160,7 @@ public class TaskController extends MainController {
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
         taskDTO.setTaskStateId(taskStateId);
-        TaskEntity task = ModelMapper.getTask(taskDTO, taskStateService);
+        TaskEntity task = modelMapper.getTask(taskDTO);
 
         taskValidator.validate(task, bindingResult);
         checkBindingResult(bindingResult);
@@ -170,7 +170,7 @@ public class TaskController extends MainController {
         return ResponseEntity
                 .created(new URI(String.format("/api/projects/%d/task-states/%d/tasks/%d",
                         projectId, taskStateId, taskEntity.getId())))
-                .body(ModelMapper.getTaskDTO(taskEntity));
+                .body(modelMapper.getTaskDTO(taskEntity));
 
     }
 
@@ -213,7 +213,7 @@ public class TaskController extends MainController {
 
         taskDTO.setId(taskId);
         taskDTO.setTaskStateId(taskStateId);
-        TaskEntity task = ModelMapper.getTask(taskDTO, taskStateService);
+        TaskEntity task = modelMapper.getTask(taskDTO);
 
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
         taskValidator.validate(task, bindingResult);
@@ -223,7 +223,7 @@ public class TaskController extends MainController {
 
         return ResponseEntity
                 .ok()
-                .body(ModelMapper.getTaskDTO(updated));
+                .body(modelMapper.getTaskDTO(updated));
     }
 
     @DeleteMapping(DELETE_TASK_BY_ID)

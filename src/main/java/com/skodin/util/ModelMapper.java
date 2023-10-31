@@ -6,68 +6,103 @@ import com.skodin.DTO.TaskStateDTO;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
 import com.skodin.models.TaskStateEntity;
-import com.skodin.services.ProjectService;
+import com.skodin.services.TaskService;
 import com.skodin.services.TaskStateService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
+import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
 public class ModelMapper {
-    private static final org.modelmapper.ModelMapper modelMapper;
+    private final org.modelmapper.ModelMapper modelMapper = new org.modelmapper.ModelMapper();
+    private final TaskStateService taskStateService;
 
-    static {
-        modelMapper = new org.modelmapper.ModelMapper();
+    {
+        configureModelMapper(modelMapper);
     }
 
-    public static ProjectDTO getProjectDTO (ProjectEntity project){
-
-        /*можно ли  переопределить метод  map для объекта ModelMapper в java */
-
-        ProjectDTO map = modelMapper.map(project, ProjectDTO.class);
-
-        // мапит встроенной map для dto отсюда и ошибка
-
-//        System.err.println(map);
-
-        return map;
+    public ProjectDTO getProjectDTO(ProjectEntity project) {
+        return modelMapper.map(project, ProjectDTO.class);
     }
 
-    public static ProjectEntity getProject (ProjectDTO projectDTO){
-
-        ProjectEntity map = modelMapper.map(projectDTO, ProjectEntity.class);
-
-        return map;
+    public ProjectEntity getProject(ProjectDTO projectDTO) {
+        return modelMapper.map(projectDTO, ProjectEntity.class);
     }
 
-    public static TaskStateDTO getTaskStateDTO (TaskStateEntity entity){
-        TaskStateDTO map = modelMapper.map(entity, TaskStateDTO.class);
-        entity.getPreviousTaskState().ifPresent(s -> map.setPreviousTaskStateId(s.getId()));
-        entity.getNextTaskState().ifPresent(s -> map.setNextTaskStateId(s.getId()));
-
-        System.err.println(map);
-
-        return map;
+    public TaskStateDTO getTaskStateDTO(TaskStateEntity entity) {
+        return modelMapper.map(entity, TaskStateDTO.class);
     }
 
-    public static TaskStateEntity getTaskState (TaskStateDTO stateDTO, TaskStateService stateService){
-        TaskStateEntity map = modelMapper.map(stateDTO, TaskStateEntity.class);
-
-        Long nextTaskStateId = stateDTO.getNextTaskStateId();
-        Long previousTaskStateId = stateDTO.getPreviousTaskStateId();
-
-        map.setNextTaskState(nextTaskStateId == null ? null : stateService.findById(nextTaskStateId));
-        map.setPreviousTaskState(previousTaskStateId == null ? null : stateService.findById(previousTaskStateId));
-        return map;
+    public TaskStateEntity getTaskState(TaskStateDTO stateDTO) {
+        return modelMapper.map(stateDTO, TaskStateEntity.class);
     }
 
-    public static TaskDTO getTaskDTO (TaskEntity entity){
-        TaskDTO map = modelMapper.map(entity, TaskDTO.class);
-        map.setTaskStateId(entity.getTaskStateEntity().getId());
-        return map;
+    public TaskDTO getTaskDTO(TaskEntity entity) {
+        return modelMapper.map(entity, TaskDTO.class);
     }
 
-    public static TaskEntity getTask (TaskDTO taskDTO, TaskStateService taskStateService){
-        TaskEntity map = modelMapper.map(taskDTO, TaskEntity.class);
-        System.err.println(taskDTO);
-        map.setTaskStateEntity(taskStateService.findById(taskDTO.getTaskStateId()));
-        return map;
+    public TaskEntity getTask(TaskDTO taskDTO) {
+        return modelMapper.map(taskDTO, TaskEntity.class);
+    }
+
+    private void configureModelMapper(org.modelmapper.ModelMapper modelMapper) {
+        Converter<Optional<TaskStateEntity>, Long> TaskStateToDtoConverter = new AbstractConverter<>() {
+            @Override
+            protected Long convert(Optional<TaskStateEntity> taskStateEntity) {
+                return taskStateEntity.map(TaskStateEntity::getId).orElse(null);
+            }
+        };
+
+        Converter<Long, TaskStateEntity> DTOtoTaskStateConverter = new AbstractConverter<>() {
+            @Override
+            protected TaskStateEntity convert(Long aLong) {
+                if (aLong != null) {
+                    return taskStateService.findById(aLong);
+                }
+                return null;    // never
+            }
+        };
+        Converter<TaskStateEntity, Long> TaskToDtoConverter = new AbstractConverter<>() {
+            @Override
+            protected Long convert(TaskStateEntity taskStateEntity) {
+                return taskStateEntity.getId();
+            }
+        };
+
+        // Task States
+        modelMapper.typeMap(TaskStateEntity.class, TaskStateDTO.class)
+                .addMappings(mapper -> {
+                    mapper.using(TaskStateToDtoConverter).map(TaskStateEntity::getPreviousTaskState, TaskStateDTO::setPreviousTaskStateId);
+                });
+
+        modelMapper.typeMap(TaskStateEntity.class, TaskStateDTO.class)
+                .addMappings(mapper -> {
+                    mapper.using(TaskStateToDtoConverter).map(TaskStateEntity::getNextTaskState, TaskStateDTO::setNextTaskStateId);
+                });
+
+        modelMapper.typeMap(TaskStateDTO.class, TaskStateEntity.class)
+                .addMappings(mapper -> {
+                    mapper.using(DTOtoTaskStateConverter).map(TaskStateDTO::getPreviousTaskStateId, TaskStateEntity::setPreviousTaskState);
+                });
+
+        modelMapper.typeMap(TaskStateDTO.class, TaskStateEntity.class)
+                .addMappings(mapper -> {
+                    mapper.using(DTOtoTaskStateConverter).map(TaskStateDTO::getNextTaskStateId, TaskStateEntity::setNextTaskState);
+                });
+
+        // Tasks
+        modelMapper.typeMap(TaskEntity.class, TaskDTO.class)
+                .addMappings(mapper -> {
+                    mapper.using(TaskToDtoConverter).map(TaskEntity::getTaskStateEntity, TaskDTO::setTaskStateId);
+                });
+
+        modelMapper.typeMap(TaskDTO.class, TaskEntity.class)
+                .addMappings(mapper -> {
+                    mapper.using(DTOtoTaskStateConverter).map(TaskDTO::getTaskStateId, TaskEntity::setTaskStateEntity);
+                });
     }
 }

@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
@@ -41,6 +40,7 @@ public class ProjectController extends MainController {
     ProjectService projectService;
     TaskStateService taskStateService;
     ProjectValidator projectValidator;
+    ModelMapper modelMapper;
 
     public static final String GET_PROJECTS = "/get";
     public static final String CREATE_PROJECT = "/create";
@@ -76,7 +76,7 @@ public class ProjectController extends MainController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(all.stream().map(ModelMapper::getProjectDTO).collect(Collectors.toList()));
+                .body(all.stream().map(modelMapper::getProjectDTO).collect(Collectors.toList()));
     }
 
     @Operation(
@@ -98,7 +98,7 @@ public class ProjectController extends MainController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ModelMapper.getProjectDTO(projectService.findById(id)));
+                .body(modelMapper.getProjectDTO(projectService.findById(id)));
     }
 
     @Operation(
@@ -127,7 +127,7 @@ public class ProjectController extends MainController {
             throw new BadRequestException("New Project cannot has any Task States");
         }
 
-        ProjectEntity project = ModelMapper.getProject(projectDTO);
+        ProjectEntity project = modelMapper.getProject(projectDTO);
 
         projectValidator.validate(project, bindingResult);
         checkBindingResult(bindingResult);
@@ -137,7 +137,7 @@ public class ProjectController extends MainController {
 
         addStates(project);
 
-        ProjectDTO projectDTO1 = ModelMapper.getProjectDTO(projectEntity);
+        ProjectDTO projectDTO1 = modelMapper.getProjectDTO(projectEntity);
 
         return ResponseEntity
                 .created(new URI("/api/projects/" + projectDTO1.getId()))
@@ -171,7 +171,7 @@ public class ProjectController extends MainController {
             @PathVariable Long id,
             BindingResult bindingResult) {
 
-        ProjectEntity project = ModelMapper.getProject(projectDTO);
+        ProjectEntity project = modelMapper.getProject(projectDTO);
 
         projectValidator.validate(project, bindingResult);
         checkBindingResult(bindingResult);
@@ -181,7 +181,7 @@ public class ProjectController extends MainController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ModelMapper.getProjectDTO(update));
+                .body(modelMapper.getProjectDTO(update));
     }
 
     @Operation(
