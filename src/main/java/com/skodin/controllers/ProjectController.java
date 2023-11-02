@@ -63,7 +63,11 @@ public class ProjectController extends MainController {
             }
     )
     public ResponseEntity<List<ProjectDTO>> getAllProjects(
+            @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Optional<String> prefix) {
+
+        token = token.substring(7);
+        System.err.println(token);
 
         List<ProjectEntity> all;
 

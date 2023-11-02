@@ -15,6 +15,8 @@ public class MyTaskTrackerApplication {
     public static void main(String[] args) {
         SpringApplication.run(MyTaskTrackerApplication.class, args);
     }
+
+
     @Bean
     public OpenAPI openAPI(){
         return new OpenAPI()
@@ -23,4 +25,6 @@ public class MyTaskTrackerApplication {
                         .description("Spring Boot Application")
                         .version("1.0"));
     }
+
+
 }
