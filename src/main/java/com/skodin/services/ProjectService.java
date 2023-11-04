@@ -3,6 +3,7 @@ package com.skodin.services;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
+import com.skodin.models.UserEntity;
 import com.skodin.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,14 @@ public class ProjectService {
 
     public List<ProjectEntity> findAllByNameStartingWith(String prefix) {
         return projectRepository.findAllByNameStartingWith(prefix);
+    }
+
+    public List<ProjectEntity> findAllByNameStartingWithAndUser(String name, UserEntity user) {
+        return projectRepository.findAllByNameStartingWithAndUser(name, user);
+    }
+
+    public List<ProjectEntity> findAllByUser(UserEntity user) {
+        return projectRepository.findAllByUser(user);
     }
 
     public ProjectEntity findById(Long aLong) {

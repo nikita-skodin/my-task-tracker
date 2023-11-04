@@ -4,8 +4,11 @@ import com.skodin.DTO.ProjectDTO;
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
+import com.skodin.models.UserEntity;
+import com.skodin.services.JwtService;
 import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
+import com.skodin.services.UserService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +41,11 @@ import java.util.stream.Collectors;
 @Tag(name = "Projects", description = "Operations related to projects")
 public class ProjectController extends MainController {
 
+    JwtService jwtService;
     ProjectService projectService;
     TaskStateService taskStateService;
     ProjectValidator projectValidator;
+    UserService userService;
     ModelMapper modelMapper;
 
     public static final String GET_PROJECTS = "/get";
@@ -66,15 +72,20 @@ public class ProjectController extends MainController {
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Optional<String> prefix) {
 
-        token = token.substring(7);
-        System.err.println(token);
+        Long id = jwtService.extractId(token);
+        System.err.println(id);
+
+        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.err.println(user);
+
+//        UserEntity user = userService.findById(id);
 
         List<ProjectEntity> all;
 
         if (prefix.isPresent()) {
-            all = projectService.findAllByNameStartingWith(prefix.get().trim()); // вместо проверки просто trim
+            all = projectService.findAllByNameStartingWithAndUser(prefix.get().trim(), user); // вместо проверки просто trim
         } else {
-            all = projectService.findAll();
+            all = projectService.findAllByUser(user);
         }
         return ResponseEntity
                 .ok()
@@ -97,7 +108,10 @@ public class ProjectController extends MainController {
             }
     )
     @GetMapping(GET_PROJECT_BY_ID)
-    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
+    public ResponseEntity<ProjectDTO> getProjectById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id) {
+        checkUserProjectAccessOrThrow(id, token, jwtService, projectService);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)

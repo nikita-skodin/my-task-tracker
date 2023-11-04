@@ -12,7 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@ToString(exclude = "projects")
+@Getter
+@Setter
 @Entity
 @Builder
 @AllArgsConstructor
@@ -35,6 +37,9 @@ public class UserEntity implements UserDetails {
 //    @Email
     // TODO: 001 сделать уникальным
     String email;
+
+    @OneToMany(mappedBy = "user")
+    List<ProjectEntity> projects;
 
     @Enumerated(EnumType.STRING)
     Role role;

@@ -34,11 +34,15 @@ public class ProjectEntity {
     @Builder.Default
     Instant createdAt = Instant.now();
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    UserEntity user;
+
     @Builder.Default
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     List<TaskStateEntity> taskStateEntities = new ArrayList<>();
 
-    public void addProjectEntities(TaskStateEntity ... entities){
+    public void addProjectEntities(TaskStateEntity... entities) {
         taskStateEntities.addAll(Arrays.asList(entities));
     }
 }

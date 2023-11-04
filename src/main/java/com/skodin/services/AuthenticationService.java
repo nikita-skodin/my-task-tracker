@@ -48,8 +48,7 @@ public class AuthenticationService {
                         request.getPassword())
         );
 
-        UserEntity user = userService.findByUsername(request.getUsername())
-                .orElseThrow();
+        UserEntity user = userService.findByUsername(request.getUsername());
 
         String token = jwtService.generateToken(user);
 

@@ -31,8 +31,9 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<UserEntity> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public UserEntity findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new NotFoundException(String.format("User with username %s not found", username)));
     }
 
     @Transactional
