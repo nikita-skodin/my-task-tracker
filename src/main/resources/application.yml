@@ -1,18 +1,19 @@
 spring:
   config:
     import: file:.env[.properties]
+
   datasource:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driverClassName: ${DRIVER}
     url: ${URL}
-#  jpa:
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: create-drop
-#    properties:
-#      hibernate:
-#        format_sql: true
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+      data-locations: classpath:db_tests/demo_data.sql
+
   security:
     jwt:
       secret: ${JWT_SECRET}
@@ -21,4 +22,12 @@ spring:
   liquibase:
     changeLog: classpath:liquibase/changelog.yml
     defaultSchema: ${DEFAULT_SCHEMA}
-    enabled: true
+    enabled: false
+
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: create-drop
+#    properties:
+#      hibernate:
+#        format_sql: true
