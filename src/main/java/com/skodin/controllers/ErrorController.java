@@ -1,4 +1,4 @@
-package com.skodin.exceptions;
+package com.skodin.controllers;
 
 import com.skodin.DTO.ErrorDTO;
 import lombok.AccessLevel;
