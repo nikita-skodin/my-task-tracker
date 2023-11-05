@@ -1,5 +1,6 @@
 package com.skodin.services;
 
+import com.skodin.exceptions.ForbiddenException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
@@ -40,8 +42,8 @@ public class ProjectService {
                 .orElseThrow(() -> new NotFoundException("Project with id " + aLong + " did not found"));
     }
 
-    public Optional<ProjectEntity> findByName(String name) {
-        return projectRepository.findByName(name);
+    public Optional<ProjectEntity> findByNameAndUser(String name, UserEntity user) {
+        return projectRepository.findByNameAndUser(name, user);
     }
 
     @Transactional
@@ -61,15 +63,25 @@ public class ProjectService {
 
     @Transactional
     public ProjectEntity update (Long id, ProjectEntity source){
-        ProjectEntity byId = findById(id);
-        source.setId(byId.getId());
-        return projectRepository.saveAndFlush(source);
+        ProjectEntity project = findById(id);
+
+        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())){
+            throw new ForbiddenException("FORBIDDEN");
+        }
+
+        project.setCreatedAt(source.getCreatedAt());
+        project.setName(source.getName());
+        return projectRepository.saveAndFlush(project);
     }
 
     @Transactional
     public void deleteById(Long aLong) {
 
-        findById(aLong);    // just check does object exist
+        ProjectEntity project = findById(aLong);
+
+        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())){
+            throw new ForbiddenException("FORBIDDEN");
+        }
 
         projectRepository.deleteById(aLong);
     }

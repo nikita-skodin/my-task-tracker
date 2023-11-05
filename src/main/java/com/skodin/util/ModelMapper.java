@@ -3,9 +3,11 @@ package com.skodin.util;
 import com.skodin.DTO.ProjectDTO;
 import com.skodin.DTO.TaskDTO;
 import com.skodin.DTO.TaskStateDTO;
+import com.skodin.DTO.UserDTO;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
 import com.skodin.models.TaskStateEntity;
+import com.skodin.models.UserEntity;
 import com.skodin.services.TaskService;
 import com.skodin.services.TaskStateService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,14 @@ public class ModelMapper {
 
     public ProjectEntity getProject(ProjectDTO projectDTO) {
         return modelMapper.map(projectDTO, ProjectEntity.class);
+    }
+
+    public UserDTO getUserDTO(UserEntity user) {
+        return modelMapper.map(user, UserDTO.class);
+    }
+
+    public UserEntity getUser(UserDTO userDTO) {
+        return modelMapper.map(userDTO, UserEntity.class);
     }
 
     public TaskStateDTO getTaskStateDTO(TaskStateEntity entity) {

@@ -41,11 +41,9 @@ import java.util.stream.Collectors;
 @Tag(name = "Projects", description = "Operations related to projects")
 public class ProjectController extends MainController {
 
-    JwtService jwtService;
     ProjectService projectService;
     TaskStateService taskStateService;
     ProjectValidator projectValidator;
-    UserService userService;
     ModelMapper modelMapper;
 
     public static final String GET_PROJECTS = "/get";
@@ -69,17 +67,9 @@ public class ProjectController extends MainController {
             }
     )
     public ResponseEntity<List<ProjectDTO>> getAllProjects(
-            @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Optional<String> prefix) {
 
-        Long id = jwtService.extractId(token);
-        System.err.println(id);
-
-        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.err.println(user);
-
-//        UserEntity user = userService.findById(id);
-
+        UserEntity user = UserService.getCurrentUser();
         List<ProjectEntity> all;
 
         if (prefix.isPresent()) {
@@ -109,9 +99,8 @@ public class ProjectController extends MainController {
     )
     @GetMapping(GET_PROJECT_BY_ID)
     public ResponseEntity<ProjectDTO> getProjectById(
-            @RequestHeader("Authorization") String token,
             @PathVariable Long id) {
-        checkUserProjectAccessOrThrow(id, token, jwtService, projectService);
+        checkUserProjectAccessOrThrow(projectService.findById(id));
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -145,6 +134,7 @@ public class ProjectController extends MainController {
         }
 
         ProjectEntity project = modelMapper.getProject(projectDTO);
+        project.setUser(UserService.getCurrentUser());
 
         projectValidator.validate(project, bindingResult);
         checkBindingResult(bindingResult);

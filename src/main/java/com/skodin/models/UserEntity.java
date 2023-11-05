@@ -27,18 +27,15 @@ public class UserEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @NotBlank
-    // TODO: 001 сделать уникальным
+    @NotBlank(message = "username cannot be blank")
     String username;
 
-    // TODO: 031 добавить валидацию пароля
     String password;
 
-//    @Email
-    // TODO: 001 сделать уникальным
+    @Email(message = "email is invalid")
     String email;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     List<ProjectEntity> projects;
 
     @Enumerated(EnumType.STRING)

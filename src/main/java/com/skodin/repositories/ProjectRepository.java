@@ -15,7 +15,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     List<ProjectEntity> findAllByNameStartingWith (String prefix);
 
-    Optional<ProjectEntity> findByName(String name);
+    Optional<ProjectEntity> findByNameAndUser(String name, UserEntity user);
 
     List<ProjectEntity> findAllByNameStartingWithAndUser (String name, UserEntity user);
 

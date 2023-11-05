@@ -72,7 +72,7 @@ public class TaskController extends MainController {
     public ResponseEntity<List<TaskDTO>> getTasks(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId) {
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
 
         ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
@@ -115,7 +115,7 @@ public class TaskController extends MainController {
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId) {
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         TaskEntity taskEntity = taskService.findById(taskId);
@@ -156,7 +156,7 @@ public class TaskController extends MainController {
             @PathVariable("task-states_id") Long taskStateId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
         taskDTO.setTaskStateId(taskStateId);
@@ -206,7 +206,7 @@ public class TaskController extends MainController {
             @PathVariable("task_id") Long taskId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
            throw new BadRequestException("Id in DTO and in url must be the same");
         }
@@ -256,7 +256,7 @@ public class TaskController extends MainController {
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId) {
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         taskService.deleteById(taskId);

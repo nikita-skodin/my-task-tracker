@@ -34,8 +34,11 @@ public class ProjectDTO {
     @Schema(name = "created_at", example = "timestamp")
     Instant createdAt = Instant.now();
 
+    @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
+    Long userId;
+
     @Builder.Default
-    @JsonProperty("task_state_entities")
+    @JsonProperty(value = "task_state_entities", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "task_state_entities", example = "[\n" +
             "    {\n" +
             "        \"id\": 145,\n" +

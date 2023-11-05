@@ -1,5 +1,7 @@
 package com.skodin.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skodin.DTO.ErrorDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,13 +39,17 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(((request, response, authException) ->
                         {
+                            response.setContentType("application/json");
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.getWriter().write("Unauthorized.");
+                            ErrorDTO errorResponse = new ErrorDTO("UNAUTHORIZED", "Invalid Token");
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
                         }
                         ))
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json");
                             response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.getWriter().write("Access Denied.");
+                            ErrorDTO errorResponse = new ErrorDTO("FORBIDDEN", "Access Denied");
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
                         }))
                 .sessionManagement(manager -> {
                     manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

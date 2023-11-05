@@ -65,6 +65,8 @@ public class TaskStateController extends MainController {
     )
     public ResponseEntity<List<TaskStateDTO>> getAllTaskStates(@PathVariable("project_id") Long id) {
 
+        checkUserProjectAccessOrThrow(projectService.findById(id));
+
         List<TaskStateEntity> taskStateEntities = projectService.findById(id).getTaskStateEntities();
 
         return ResponseEntity
@@ -97,6 +99,7 @@ public class TaskStateController extends MainController {
     public ResponseEntity<TaskStateDTO> getTaskState(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-state_id") Long taskStateId) {
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
 
         TaskStateEntity taskStateEntity = taskStateService.findById(taskStateId);
 
@@ -137,6 +140,8 @@ public class TaskStateController extends MainController {
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("project_id") Long id) {
+
+        checkUserProjectAccessOrThrow(projectService.findById(id));
 
         if (taskStateDTO.getId() != null) {
             throw new BadRequestException("New Task State cannot has an id");
@@ -196,7 +201,7 @@ public class TaskStateController extends MainController {
             BindingResult bindingResult,
             @PathVariable("task-state_id") Long taskStateId,
             @PathVariable("project_id") Long projectId){
-
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         if (!Objects.equals(projectId, taskStateDTO.getProjectId())){
             throw new BadRequestException("You can not change project for Task States");
         }
@@ -240,6 +245,7 @@ public class TaskStateController extends MainController {
     public ResponseEntity<HttpStatus> deleteTasStateById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-state_id") Long taskStateId){
+        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         TaskStateEntity byId = taskStateService.findById(taskStateId);
         taskStateInProjectOrThrowEx(taskStateId, projectId, byId);
         taskStateService.deleteById(taskStateId);

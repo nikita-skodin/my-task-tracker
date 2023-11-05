@@ -5,6 +5,7 @@ import com.skodin.models.UserEntity;
 import com.skodin.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Transient;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    public static UserEntity getCurrentUser(){
+        return (UserEntity) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
 
     public List<UserEntity> findAll() {
         return userRepository.findAll();
@@ -31,14 +40,20 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public UserEntity findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotFoundException(String.format("User with username %s not found", username)));
+    public Optional<UserEntity> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Transactional
     public <S extends UserEntity> S saveAndFlush(S entity) {
         return userRepository.saveAndFlush(entity);
+    }
+
+    @Transactional
+    public UserEntity update(Long id, UserEntity user){
+        UserEntity byId = findById(id);
+        user.setId(byId.getId());
+        return saveAndFlush(user);
     }
 
     @Transactional

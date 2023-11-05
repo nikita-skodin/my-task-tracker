@@ -39,7 +39,7 @@ public class ProjectEntity {
     UserEntity user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     List<TaskStateEntity> taskStateEntities = new ArrayList<>();
 
     public void addProjectEntities(TaskStateEntity... entities) {

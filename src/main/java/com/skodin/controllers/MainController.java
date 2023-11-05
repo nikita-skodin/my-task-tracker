@@ -2,13 +2,18 @@ package com.skodin.controllers;
 
 import com.skodin.DTO.ErrorDTO;
 import com.skodin.exceptions.BadRequestException;
+import com.skodin.exceptions.ForbiddenException;
+import com.skodin.models.ProjectEntity;
+import com.skodin.models.UserEntity;
 import com.skodin.services.JwtService;
 import com.skodin.services.ProjectService;
+import com.skodin.services.UserService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -22,17 +27,18 @@ import java.util.Set;
 @RequiredArgsConstructor
 public abstract class MainController {
 
-    protected void checkUserProjectAccessOrThrow(
-            Long projectId, String token,
-            JwtService jwtService,
-            ProjectService projectService) {
-
-        Long userId = jwtService.extractId(token);
-        System.err.println("userId: " + userId);
-
-        if (!Objects.equals(projectService.findById(projectId).getUser().getId(), userId)) {
+    protected void checkUserProjectAccessOrThrow(ProjectEntity project) {
+        UserEntity user = UserService.getCurrentUser();
+        if (!Objects.equals(project.getUser().getId(), user.getId())) {
             throw new BadRequestException
-                    (String.format("User with id %d has not project with id %d", userId, projectId));
+                    (String.format("User with id %d has not project with id %d",
+                            user.getId(), project.getId()));
+        }
+    }
+
+    protected void checkUsersRules(UserEntity user) {
+        if (!user.getId().equals(UserService.getCurrentUser().getId())){
+            throw new ForbiddenException("FORBIDDEN");
         }
     }
 
