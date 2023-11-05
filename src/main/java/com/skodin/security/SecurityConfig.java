@@ -1,4 +1,4 @@
-package com.skodin.config.security;
+package com.skodin.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skodin.DTO.ErrorDTO;
@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration

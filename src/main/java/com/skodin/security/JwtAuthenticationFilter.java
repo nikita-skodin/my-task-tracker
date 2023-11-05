@@ -1,4 +1,4 @@
-package com.skodin.config.security;
+package com.skodin.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skodin.DTO.ErrorDTO;
