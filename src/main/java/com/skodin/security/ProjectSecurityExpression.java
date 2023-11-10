@@ -6,6 +6,7 @@ import com.skodin.models.UserEntity;
 import com.skodin.services.ProjectService;
 import com.skodin.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -18,8 +19,12 @@ public class ProjectSecurityExpression {
 
     public boolean checkUserProjectAccess(Long id) {
         ProjectEntity project = projectService.findById(id);
+        System.err.println("checkUserProjectAccess");
+        System.err.println(project);
         UserEntity user = UserService.getCurrentUser();
         return Objects.equals(project.getUser().getId(), user.getId());
     }
 
 }
+
+

@@ -21,14 +21,6 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
 
-    public List<ProjectEntity> findAll() {
-        return projectRepository.findAll();
-    }
-
-    public List<ProjectEntity> findAllByNameStartingWith(String prefix) {
-        return projectRepository.findAllByNameStartingWith(prefix);
-    }
-
     public List<ProjectEntity> findAllByNameStartingWithAndUser(String name, UserEntity user) {
         return projectRepository.findAllByNameStartingWithAndUser(name, user);
     }

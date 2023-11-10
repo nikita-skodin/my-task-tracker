@@ -1,8 +1,9 @@
 -- Заполнение таблицы "user"
 INSERT INTO "user" (username, password, email, role)
+-- password
 VALUES
-    ('user1', 'password1', 'user1@example.com', 'ROLE_USER'),
-    ('user2', 'password2', 'user2@example.com', 'ROLE_USER');
+    ('user1', '$2a$10$h8tF9AQttfqv/FjMihPtou.dV.Fimrs0e1rCT/zBFU7I/hT4qyCvO', 'user1@example.com', 'USER'),
+    ('user2', '$2a$10$h8tF9AQttfqv/FjMihPtou.dV.Fimrs0e1rCT/zBFU7I/hT4qyCvO', 'user2@example.com', 'USER');
 
 -- Заполнение таблицы "project"
 INSERT INTO "project" (name, created_at, user_id)
