@@ -1,3 +1,7 @@
+drop table if exists "databasechangelog";
+drop table if exists "databasechangeloglock";
+
+
 drop table if exists "task";
 drop table if exists "task-state";
 drop table if exists "project";
