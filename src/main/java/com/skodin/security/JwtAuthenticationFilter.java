@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             if (jwt != null && jwt.startsWith("Bearer ")) {
                 jwt = jwt.substring(7);
 
-                if (jwtService.isTokenValid(jwt, userDetailsService)) {
+                if (jwtService.isTokenValid(jwt)) {
 
                     String username = jwtService.extractUsername(jwt);
                     userDetailsService.loadUserByUsername(username);
@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
-                            ((UserEntity) userDetails).getId().toString(),
+                            jwtService.extractAllClaims(jwt),
                             userDetails.getAuthorities()
                     );
 

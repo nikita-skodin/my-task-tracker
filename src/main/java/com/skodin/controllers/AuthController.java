@@ -34,5 +34,13 @@ public class AuthController extends MainController {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refresh(
+            @RequestBody String refreshToken
+    ){
+        System.err.println(refreshToken);
+        return ResponseEntity.ok(authenticationService.refresh(refreshToken));
+    }
+
 }
 

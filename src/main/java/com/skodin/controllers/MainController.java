@@ -26,16 +26,6 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 public abstract class MainController {
-
-    protected void checkUserProjectAccessOrThrow(ProjectEntity project) {
-        UserEntity user = UserService.getCurrentUser();
-        if (!Objects.equals(project.getUser().getId(), user.getId())) {
-            throw new BadRequestException
-                    (String.format("User with id %d has not project with id %d",
-                            user.getId(), project.getId()));
-        }
-    }
-
     protected void checkUsersRules(UserEntity user) {
         if (!user.getId().equals(UserService.getCurrentUser().getId())){
             throw new ForbiddenException("FORBIDDEN");

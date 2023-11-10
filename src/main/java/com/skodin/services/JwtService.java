@@ -1,46 +1,37 @@
 package com.skodin.services;
 
+import com.skodin.exceptions.InvalidToken;
 import com.skodin.models.UserEntity;
+import com.skodin.util.auth.AuthenticationResponse;
 import com.skodin.util.auth.JWTProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class JwtService {
-
     private final JWTProperties jwtProperties;
+    private final UserDetailsService userDetailsService;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
-    }
-
-    public Long extractId(String token) {
-
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-        return Long.parseLong(Jwts
-                .parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -48,13 +39,16 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        UserEntity entity = (UserEntity) userDetails;
-        Map<String, String> extractClaims = Collections.singletonMap("id", entity.getId().toString());
-        return generateToken(extractClaims, userDetails);
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateAccessToken(Collections.emptyMap(), userDetails);
     }
 
-    public String generateToken(Map<String, String> extractClaims, UserDetails userDetails) {
+    public String generateAccessToken(@NotNull Map<String, Object> extractClaims, UserDetails userDetails) {
+
+        if (extractClaims == null){
+            extractClaims = Collections.emptyMap();
+        }
+
         return Jwts
                 .builder()
                 .setClaims(extractClaims)
@@ -65,7 +59,41 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetailsService userDetailsService) {
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateRefreshToken(Collections.emptyMap(), userDetails);
+    }
+
+    public String generateRefreshToken(@NotNull Map<String, Object> extractClaims, UserDetails userDetails) {
+
+        if (extractClaims == null){
+            extractClaims = Collections.emptyMap();
+        }
+
+        return Jwts
+                .builder()
+                .setClaims(extractClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefresh()))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public AuthenticationResponse refreshUserToken(String refreshToken){
+        if (!isTokenValid(refreshToken)){
+            throw new InvalidToken("Token is invalid");
+        }
+
+        String username = extractUsername(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        return new AuthenticationResponse(
+                generateAccessToken(extractAllClaims(refreshToken), userDetails),
+                generateRefreshToken(extractAllClaims(refreshToken), userDetails)
+        );
+    }
+
+    public boolean isTokenValid(String token) {
         try {
             String username = extractUsername(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -84,7 +112,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignKey())

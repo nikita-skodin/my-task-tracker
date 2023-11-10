@@ -11,17 +11,14 @@ import com.skodin.validators.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -47,27 +44,33 @@ public class AuthenticationService {
 
         UserEntity entity = userService.saveAndFlush(user);
 
-        String token = jwtService.generateToken(entity);
+        String accessToken = jwtService.generateAccessToken(entity);
+        String refreshToken = jwtService.generateRefreshToken(entity);
 
-        return new AuthenticationResponse(token);
+        return new AuthenticationResponse(accessToken, refreshToken);
 
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword())
-        );
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword())
+            );
 
         UserEntity user = userService
                 .findByUsername(request.getUsername())
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User with username %s not found", request.getUsername())));
 
-        String token = jwtService.generateToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new AuthenticationResponse(token);
+        return new AuthenticationResponse(accessToken, refreshToken);
+    }
+
+    public AuthenticationResponse refresh(String refreshToken) {
+        return jwtService.refreshUserToken(refreshToken);
     }
 
     private void checkBindingResult(BindingResult bindingResult) {
@@ -80,5 +83,4 @@ public class AuthenticationService {
             }
         }
     }
-
 }

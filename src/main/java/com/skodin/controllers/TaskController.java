@@ -24,6 +24,7 @@ import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,10 +70,10 @@ public class TaskController extends MainController {
                     @ApiResponse(responseCode = "200", description = "Successful operation")
             }
     )
+    @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<List<TaskDTO>> getTasks(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId) {
-        checkUserProjectAccessOrThrow(projectService.findById(projectId));
 
         ProjectTaskStateTuple tuple = checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
@@ -111,11 +112,11 @@ public class TaskController extends MainController {
                     @ApiResponse(responseCode = "404", description = "Not found")
             }
     )
+    @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> getTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId) {
-        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         TaskEntity taskEntity = taskService.findById(taskId);
@@ -151,12 +152,12 @@ public class TaskController extends MainController {
                     @ApiResponse(responseCode = "400", description = "Bad request")
             }
     )
+    @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> createTask(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
         taskDTO.setTaskStateId(taskStateId);
@@ -200,13 +201,13 @@ public class TaskController extends MainController {
                     @ApiResponse(responseCode = "404", description = "Not found")
             }
     )
+    @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> updateTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
            throw new BadRequestException("Id in DTO and in url must be the same");
         }
@@ -252,11 +253,11 @@ public class TaskController extends MainController {
                     @ApiResponse(responseCode = "404", description = "Not found")
             }
     )
+    @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<HttpStatus> deleteTaskById(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId) {
-        checkUserProjectAccessOrThrow(projectService.findById(projectId));
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, taskId);
 
         taskService.deleteById(taskId);

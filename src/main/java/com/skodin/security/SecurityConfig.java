@@ -40,7 +40,7 @@ public class SecurityConfig {
                         {
                             response.setContentType("application/json");
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            ErrorDTO errorResponse = new ErrorDTO("UNAUTHORIZED", "Invalid Token");
+                            ErrorDTO errorResponse = new ErrorDTO("UNAUTHORIZED", "Incorrect data");
                             response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
                         }
                         ))
