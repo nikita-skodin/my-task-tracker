@@ -19,8 +19,6 @@ public class ProjectSecurityExpression {
 
     public boolean checkUserProjectAccess(Long id) {
         ProjectEntity project = projectService.findById(id);
-        System.err.println("checkUserProjectAccess");
-        System.err.println(project);
         UserEntity user = UserService.getCurrentUser();
         return Objects.equals(project.getUser().getId(), user.getId());
     }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableCaching
 @EnableMethodSecurity
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -34,7 +36,6 @@ public class MyTaskTrackerApplication {
         SpringApplication.run(MyTaskTrackerApplication.class, args);
     }
 
-
     @Bean
     public OpenAPI openAPI(){
         return new OpenAPI()
@@ -43,6 +44,7 @@ public class MyTaskTrackerApplication {
                         .description("Spring Boot Application")
                         .version("1.0"));
     }
+
 
     @Bean
     public UserDetailsService userDetailsService(){
@@ -70,3 +72,8 @@ public class MyTaskTrackerApplication {
     }
 
 }
+
+
+
+
+

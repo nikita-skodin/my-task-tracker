@@ -7,6 +7,10 @@ import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
 import com.skodin.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,28 +18,32 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
 
-    public List<ProjectEntity> findAllByNameStartingWithAndUser(String name, UserEntity user) {
-        return projectRepository.findAllByNameStartingWithAndUser(name, user);
+    @SneakyThrows
+    @Cacheable("findById")
+    public ProjectEntity findById(Long id) {
+        System.err.println("METHOD IS WORKING");
+        Thread.sleep(3000);
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Project with id " + id + " did not found"));
     }
 
     public List<ProjectEntity> findAllByUser(UserEntity user) {
         return projectRepository.findAllByUser(user);
     }
 
-    public ProjectEntity findById(Long aLong) {
-        return projectRepository.findById(aLong)
-                .orElseThrow(() -> new NotFoundException("Project with id " + aLong + " did not found"));
-    }
-
     public Optional<ProjectEntity> findByNameAndUser(String name, UserEntity user) {
         return projectRepository.findByNameAndUser(name, user);
+    }
+
+    public List<ProjectEntity> findAllByNameStartingWithAndUser(String name, UserEntity user) {
+        return projectRepository.findAllByNameStartingWithAndUser(name, user);
     }
 
     @Transactional
@@ -49,15 +57,11 @@ public class ProjectService {
     }
 
     @Transactional
-    public <S extends ProjectEntity> S save(S entity) {
-        return projectRepository.save(entity);
-    }
-
-    @Transactional
-    public ProjectEntity update (Long id, ProjectEntity source){
+    @CachePut(value = "findById", key = "#id")
+    public ProjectEntity update(Long id, ProjectEntity source) {
         ProjectEntity project = findById(id);
 
-        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())){
+        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())) {
             throw new ForbiddenException("FORBIDDEN");
         }
 
@@ -67,14 +71,16 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteById(Long aLong) {
+    @CacheEvict("findById")
+    public void deleteById(Long id) {
 
-        ProjectEntity project = findById(aLong);
+        ProjectEntity project = findById(id);
 
-        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())){
+        if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())) {
             throw new ForbiddenException("FORBIDDEN");
         }
 
-        projectRepository.deleteById(aLong);
+        projectRepository.deleteById(id);
     }
 }
+
