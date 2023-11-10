@@ -6,6 +6,7 @@ import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
 import com.skodin.repositories.ProjectRepository;
+import com.skodin.services.cache.ProjectServiceCache;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.cache.Cache;
@@ -27,15 +28,11 @@ import java.util.Optional;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ProjectServiceCache projectServiceCache;
     private final CacheManager cacheManager;
 
-    @SneakyThrows
-    @Cacheable("ProjectService::findById")
     public ProjectEntity findById(Long id) {
-        System.err.println("ProjectService::findById IS WORKING");
-        Thread.sleep(3000);
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Project with id " + id + " did not found"));
+        return projectServiceCache.findById(id);
     }
 
     public List<ProjectEntity> findAllByUser(UserEntity user) {
