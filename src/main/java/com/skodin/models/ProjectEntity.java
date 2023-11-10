@@ -17,6 +17,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"taskStateEntities", "user"})
 @EqualsAndHashCode(exclude = {"taskStateEntities"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "project")

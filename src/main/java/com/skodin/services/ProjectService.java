@@ -8,9 +8,12 @@ import com.skodin.models.UserEntity;
 import com.skodin.repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +27,12 @@ import java.util.Optional;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final CacheManager cacheManager;
 
     @SneakyThrows
-    @Cacheable("findById")
+    @Cacheable("ProjectService::findById")
     public ProjectEntity findById(Long id) {
-        System.err.println("METHOD IS WORKING");
+        System.err.println("ProjectService::findById IS WORKING");
         Thread.sleep(3000);
         return projectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Project with id " + id + " did not found"));
@@ -38,6 +42,7 @@ public class ProjectService {
         return projectRepository.findAllByUser(user);
     }
 
+    @Cacheable(value = "ProjectRepository::findByNameAndUser", key = "#name")
     public Optional<ProjectEntity> findByNameAndUser(String name, UserEntity user) {
         return projectRepository.findByNameAndUser(name, user);
     }
@@ -57,7 +62,12 @@ public class ProjectService {
     }
 
     @Transactional
-    @CachePut(value = "findById", key = "#id")
+    @Caching(
+            put = {
+                    @CachePut(value = "ProjectService::findById", key = "#id"),
+                    @CachePut(value = "ProjectRepository::findByNameAndUser", key = "#source.name"),
+            }
+    )
     public ProjectEntity update(Long id, ProjectEntity source) {
         ProjectEntity project = findById(id);
 
@@ -71,9 +81,12 @@ public class ProjectService {
     }
 
     @Transactional
-    @CacheEvict("findById")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "ProjectService::findById", key = "#id"),
+            }
+    )
     public void deleteById(Long id) {
-
         ProjectEntity project = findById(id);
 
         if (!Objects.equals(project.getUser().getId(), UserService.getCurrentUser().getId())) {
@@ -81,6 +94,11 @@ public class ProjectService {
         }
 
         projectRepository.deleteById(id);
+
+        Cache cache = cacheManager.getCache("ProjectRepository::findByNameAndUser");
+        if (cache != null) {
+            cache.evict(project.getName());
+        }
     }
 }
 
