@@ -5,7 +5,6 @@ import com.skodin.exceptions.BadRequestException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
-import com.skodin.services.JwtService;
 import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.services.UserService;
@@ -26,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,17 +33,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Tag(name = "Projects", description = "Operations related to projects")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/projects")
-@Tag(name = "Projects", description = "Operations related to projects")
+@RequiredArgsConstructor
 public class ProjectController extends MainController {
 
-    ProjectService projectService;
-    TaskStateService taskStateService;
-    ProjectValidator projectValidator;
     ModelMapper modelMapper;
+    ProjectService projectService;
+    ProjectValidator projectValidator;
+    TaskStateService taskStateService;
 
     public static final String GET_PROJECTS = "/get";
     public static final String CREATE_PROJECT = "/create";
@@ -56,13 +54,13 @@ public class ProjectController extends MainController {
     @GetMapping(GET_PROJECTS)
     @Operation(
             summary = "Get all projects",
-            description = "Returns all project without Task States",
+            description = "Returns all projects, possibly with Task States",
             parameters = {
                     @Parameter(
                             name = "prefix",
-                            description = "project name`s prefix",
+                            description = "project`s name prefix",
                             in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
+                            schema = @Schema(type = "String"))},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation")
             }
@@ -71,17 +69,17 @@ public class ProjectController extends MainController {
             @RequestParam(required = false) Optional<String> prefix) {
 
         UserEntity user = UserService.getCurrentUser();
-        List<ProjectEntity> all;
+        List<ProjectEntity> projects;
 
-        if (prefix.isPresent()) {
-            all = projectService.findAllByNameStartingWithAndUser(prefix.get().trim(), user); // вместо проверки просто trim
+        if (prefix.isPresent() && !prefix.get().isBlank()) {
+            projects = projectService.findAllByNameStartingWithAndUser(prefix.get(), user);
         } else {
-            all = projectService.findAllByUser(user);
+            projects = projectService.findAllByUser(user);
         }
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(all.stream().map(modelMapper::getProjectDTO).collect(Collectors.toList()));
+                .body(projects.stream().map(modelMapper::getProjectDTO).collect(Collectors.toList()));
     }
 
     @Operation(

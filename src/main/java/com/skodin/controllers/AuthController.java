@@ -38,7 +38,6 @@ public class AuthController extends MainController {
     public ResponseEntity<AuthenticationResponse> refresh(
             @RequestBody String refreshToken
     ){
-        System.err.println(refreshToken);
         return ResponseEntity.ok(authenticationService.refresh(refreshToken));
     }
 
