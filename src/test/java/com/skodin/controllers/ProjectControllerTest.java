@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -192,6 +193,51 @@ class ProjectControllerTest extends MainController {
         assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(201));
         assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
     }
+
+
+    @Test
+    void deleteProjectById_ReturnsValidResponseEntity() {
+        // setup
+        doNothing().when(projectService).deleteById(ID);
+
+        // act
+        ResponseEntity<HttpStatus> result = projectController.deleteProjectById(ID);
+
+        //verify
+        assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(200));
+        verify(projectService, times(1)).deleteById(ID);
+    }
+
+
+    @Test
+    void updateProject_ReturnsValidResponseEntity() {
+        // setup
+        ProjectDTO projectDTO =  new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
+        ProjectEntity project =  new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
+
+        ProjectEntity updatedProject =  new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
+        ProjectDTO returnedProjectDTO =  new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
+
+        when(modelMapper.getProject(projectDTO)).thenReturn(project);
+        when(modelMapper.getProjectDTO(updatedProject)).thenReturn(returnedProjectDTO);
+        doNothing().when(projectValidator).validate(project, bindingResult);
+        when(projectService.update(ID, project)).thenReturn(updatedProject);
+
+        // act
+        ResponseEntity<ProjectDTO> result = projectController.updateProject(projectDTO, ID, bindingResult);
+
+        //verify
+        assertNotNull(result);
+        assertNotNull(result.getBody());
+        assertEquals(result.getBody(), returnedProjectDTO);
+
+        assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(200));
+        assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+
+        verify(projectService, times(1)).update(ID, project);
+    }
+
+
 
 
 

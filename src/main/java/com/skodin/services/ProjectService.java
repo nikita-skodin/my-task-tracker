@@ -72,7 +72,6 @@ public class ProjectService {
             throw new ForbiddenException("FORBIDDEN");
         }
 
-        project.setCreatedAt(source.getCreatedAt());
         project.setName(source.getName());
         return projectRepository.saveAndFlush(project);
     }

@@ -146,14 +146,16 @@ public class ProjectController extends MainController {
 
     @Operation(
             summary = "Update project by id",
-            description = "Returns updated project with Task States. Updates all fields. " +
-                    "For adding new Task States see TaskStateController",
+            description = """
+                    Returns updated project with Task States. Updates only name.
+                    For adding new Task States see TaskStateController.
+                    """,
             parameters = {
                     @Parameter(
                             name = "id",
                             description = "project`s id",
                             in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
+                            schema = @Schema(type = "Long"))},
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "empty JSON projectDTO",
                     content = @Content(
@@ -190,7 +192,7 @@ public class ProjectController extends MainController {
                             name = "id",
                             description = "project`s id",
                             in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
+                            schema = @Schema(type = "Long"))},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation"),
                     @ApiResponse(responseCode = "400", description = "Bad request")
@@ -202,7 +204,7 @@ public class ProjectController extends MainController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-     private void addStates(ProjectEntity project) {
+    private void addStates(ProjectEntity project) {
 
         TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("To do").build());
