@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = {"taskStateEntities"})
+//@EqualsAndHashCode(exclude = {"taskStateEntities"})
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,13 +24,14 @@ import java.util.List;
 public class ProjectDTO {
 
     @Schema(name = "id", example = "1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Long id;
 
     @Schema(name = "name", example = "This is the name of project")
     String name;
 
     @Builder.Default
-    @JsonProperty("created_at")
+    @JsonProperty(value = "created_at", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "created_at", example = "timestamp")
     Instant createdAt = Instant.now();
 

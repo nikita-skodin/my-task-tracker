@@ -3,30 +3,33 @@ package com.skodin.controllers;
 import com.skodin.DTO.ProjectDTO;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.Role;
+import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
 import com.skodin.services.ProjectService;
+import com.skodin.services.TaskStateService;
 import com.skodin.services.UserService;
 import com.skodin.util.ModelMapper;
-import org.apache.catalina.User;
+import com.skodin.validators.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectControllerTest extends MainController {
@@ -43,6 +46,15 @@ class ProjectControllerTest extends MainController {
     ProjectService projectService;
 
     @Mock
+    ProjectValidator projectValidator;
+
+    @Mock
+    TaskStateService taskStateService;
+
+    @Mock
+    BindingResult bindingResult;
+
+    @Mock
     ModelMapper modelMapper;
 
     @InjectMocks
@@ -54,7 +66,6 @@ class ProjectControllerTest extends MainController {
         var projects = List.of(
                 new ProjectEntity(ID, "name1", NOW, USER, new ArrayList<>()),
                 new ProjectEntity(ID, "name2", NOW, USER, new ArrayList<>())
-
         );
 
         var projectsDTO = List.of(
@@ -67,24 +78,20 @@ class ProjectControllerTest extends MainController {
         when(modelMapper.getProjectDTO(projects.get(1))).thenReturn(projectsDTO.get(1));
 
         // act
-        ResponseEntity<?> result;
+        ResponseEntity<List<ProjectDTO>> result;
 
         try (MockedStatic<UserService> theMock = mockStatic(UserService.class)) {
             theMock.when(UserService::getCurrentUser).thenReturn(USER);
-
             result = projectController.getAllProjects(Optional.empty());
         }
 
-        List<ProjectDTO> resultBody = (List<ProjectDTO>) result.getBody();
-
         //verify
         assertNotNull(result);
-        assertNotNull(resultBody);
+        assertNotNull(result.getBody());
         assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(200));
         assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
 
-        assertTrue(resultBody.size() == projectsDTO.size() &&
-                resultBody.containsAll(projectsDTO) && projectsDTO.containsAll(resultBody));
+        assertEquals(result.getBody(), projectsDTO);
     }
 
     @Test
@@ -106,24 +113,100 @@ class ProjectControllerTest extends MainController {
         when(modelMapper.getProjectDTO(projects.get(1))).thenReturn(projectsDTO.get(1));
 
         // act
-        ResponseEntity<?> result;
+        ResponseEntity<List<ProjectDTO>> result;
 
         try (MockedStatic<UserService> theMock = mockStatic(UserService.class)) {
             theMock.when(UserService::getCurrentUser).thenReturn(USER);
-
             result = projectController.getAllProjects(prefix);
         }
 
-        List<ProjectDTO> resultBody = (List<ProjectDTO>) result.getBody();
-
         //verify
         assertNotNull(result);
-        assertNotNull(resultBody);
-
-        List<ProjectDTO> list = resultBody.stream().filter(el -> !el.getName().startsWith(prefix.get())).toList();
-        assertTrue(list.isEmpty());
+        assertNotNull(result.getBody());
+        assertEquals(result.getBody(), projectsDTO);
 
         assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(200));
         assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
     }
+
+    @Test
+    void getProjectById_ReturnsValidResponseEntity() {
+        // setup
+        ProjectEntity project =  new ProjectEntity(ID, "TestName1", NOW, USER, new ArrayList<>());
+        ProjectDTO projectDTO =  new ProjectDTO(ID, "TestName1", NOW, USER.getId(), new ArrayList<>());
+
+        when(projectService.findById(ID)).thenReturn(project);
+        when(modelMapper.getProjectDTO(project)).thenReturn(projectDTO);
+
+        // act
+        ResponseEntity<ProjectDTO> result = projectController.getProjectById(ID);
+
+        //verify
+        assertNotNull(result);
+        assertNotNull(result.getBody());
+        assertEquals(result.getBody(), projectDTO);
+
+        assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(200));
+        assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+    }
+
+
+    @Test
+    void createProject_ReturnsValidProjectDTO() {
+        // setup
+        ProjectDTO projectDTO =  new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
+        ProjectEntity project =  new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
+
+        ProjectEntity returnedProject =  new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
+        ProjectDTO returnedProjectDTO =  new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
+
+        when(modelMapper.getProject(projectDTO)).thenReturn(project);
+        doNothing().when(projectValidator).validate(project, bindingResult);
+        when(projectService.saveAndFlush(project)).thenReturn(returnedProject);
+        when(modelMapper.getProjectDTO(returnedProject)).thenReturn(returnedProjectDTO);
+        when(taskStateService.saveAndFlush(any(TaskStateEntity.class))).thenReturn(new TaskStateEntity());
+
+        // act
+        ResponseEntity<ProjectDTO> result;
+        try (MockedStatic<UserService> theMock = mockStatic(UserService.class)) {
+            theMock.when(UserService::getCurrentUser).thenReturn(USER);
+
+            result = projectController.createProject(projectDTO, bindingResult);
+
+        }
+
+        //verify
+        verify(projectValidator).validate(project, bindingResult);
+
+        verify(taskStateService, times(1))
+                .saveAndFlush(argThat(argument -> argument.getName().equals("In progress")));
+        verify(taskStateService, times(1))
+                .saveAndFlush(argThat(argument -> argument.getName().equals("Done")));
+        verify(taskStateService, times(1))
+                .saveAndFlush(argThat(argument -> argument.getName().equals("To do")));
+
+        assertNotNull(result);
+        assertNotNull(result.getBody());
+        assertEquals(result.getBody(), returnedProjectDTO);
+
+        assertEquals(result.getStatusCode(), HttpStatusCode.valueOf(201));
+        assertEquals(result.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

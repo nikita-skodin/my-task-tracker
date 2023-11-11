@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -90,7 +91,7 @@ public class ProjectController extends MainController {
                             name = "id",
                             description = "project`s id",
                             in = ParameterIn.QUERY,
-                            schema = @Schema(type = "long"))},
+                            schema = @Schema(type = "Long"))},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation"),
                     @ApiResponse(responseCode = "404", description = "Not found")
@@ -110,7 +111,7 @@ public class ProjectController extends MainController {
             summary = "Create new project",
             description = "Returns new project DTO with 3 empty Task States DTO",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "empty JSON projectDTO",
+                    description = "empty JSON projectDTO with name only",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ProjectDTO.class))),
@@ -119,25 +120,17 @@ public class ProjectController extends MainController {
                     @ApiResponse(responseCode = "400", description = "Bad request")
             }
     )
-    @SneakyThrows
     @PostMapping(CREATE_PROJECT)
     public ResponseEntity<ProjectDTO> createProject(
             @RequestBody ProjectDTO projectDTO,
             BindingResult bindingResult
     ) {
-        if (projectDTO.getId() != null) {
-            throw new BadRequestException("New Project cannot has an id");
-        }
-        if (!projectDTO.getTaskStateEntities().isEmpty()) {
-            throw new BadRequestException("New Project cannot has any Task States");
-        }
 
         ProjectEntity project = modelMapper.getProject(projectDTO);
         project.setUser(UserService.getCurrentUser());
 
         projectValidator.validate(project, bindingResult);
         checkBindingResult(bindingResult);
-
 
         ProjectEntity projectEntity = projectService.saveAndFlush(project);
 
@@ -146,7 +139,7 @@ public class ProjectController extends MainController {
         ProjectDTO projectDTO1 = modelMapper.getProjectDTO(projectEntity);
 
         return ResponseEntity
-                .created(new URI("/api/projects/" + projectDTO1.getId()))
+                .created(URI.create("/api/projects/" + projectDTO1.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(projectDTO1);
     }
@@ -209,7 +202,7 @@ public class ProjectController extends MainController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void addStates(ProjectEntity project) {
+     private void addStates(ProjectEntity project) {
 
         TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("To do").build());
