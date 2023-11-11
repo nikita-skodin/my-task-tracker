@@ -1,6 +1,5 @@
 .idea
 .mvn
-src/test
 target
 TT.txt
 HELP.md
