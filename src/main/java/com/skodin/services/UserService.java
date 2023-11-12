@@ -40,6 +40,10 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public Optional<UserEntity> findByActivationCode(String code) {
+        return userRepository.findByActivationCode(code);
+    }
+
     public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -53,6 +57,7 @@ public class UserService {
     public UserEntity update(Long id, UserEntity user){
         UserEntity byId = findById(id);
         user.setId(byId.getId());
+        user.setActivationCode(byId.getActivationCode());
         return saveAndFlush(user);
     }
 

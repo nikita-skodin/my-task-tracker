@@ -7,6 +7,7 @@ import com.skodin.util.auth.AuthenticationResponse;
 import com.skodin.util.auth.RegisterRequest;
 import com.skodin.models.Role;
 import com.skodin.models.UserEntity;
+import com.skodin.util.mail.MailSandler;
 import com.skodin.validators.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +30,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final UserValidator userValidator;
     private final AuthenticationManager authenticationManager;
+    private final MailSandler mailSandler;
 
     public AuthenticationResponse register(RegisterRequest request, BindingResult bindingResult) {
         UserEntity user = UserEntity.builder()
@@ -36,6 +38,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .role(Role.USER)
+                .activationCode(UUID.randomUUID().toString())
                 .build();
 
         userValidator.validate(user, bindingResult);
@@ -47,8 +50,11 @@ public class AuthenticationService {
         String accessToken = jwtService.generateAccessToken(entity);
         String refreshToken = jwtService.generateRefreshToken(entity);
 
-        return new AuthenticationResponse(accessToken, refreshToken);
+        String link = "localhost:8080/api/auth/enable/" + user.getActivationCode();
 
+        mailSandler.sendSimpleMessage(request.getEmail(), "Confirmation", link);
+
+        return new AuthenticationResponse(accessToken, refreshToken);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -82,5 +88,23 @@ public class AuthenticationService {
                 }
             }
         }
+    }
+
+    public Boolean enable(String code) {
+
+        if (code == null){
+            throw new BadRequestException("code cannot be null");
+        }
+
+        Optional<UserEntity> user = userService.findByActivationCode(code);
+
+        user.ifPresent(userEntity -> {
+            userEntity.setActivationCode(null);
+            UserEntity user1 = user.get();
+            userService.update(user1.getId(), user1);
+        });
+
+
+        return user.isPresent();
     }
 }

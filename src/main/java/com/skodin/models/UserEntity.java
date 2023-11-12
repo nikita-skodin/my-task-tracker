@@ -41,7 +41,8 @@ public class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
-    Integer activationCode;
+    @Column(name = "activation_code")
+    String activationCode;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,6 +66,6 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return activationCode == null;
     }
 }

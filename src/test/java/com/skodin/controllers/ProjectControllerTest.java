@@ -40,7 +40,7 @@ class ProjectControllerTest extends MainController {
 
     private static final UserEntity USER = new UserEntity(
             ID, "name", "password",
-            "email", null, Role.USER
+            "email", null, Role.USER, null
     );
 
     @Mock

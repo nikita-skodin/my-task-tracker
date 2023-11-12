@@ -13,7 +13,8 @@ create table if not exists "user"
     username varchar not null,
     password varchar not null,
     email    varchar not null,
-    role     varchar not null
+    role            varchar not null,
+    activation_code varchar
 );
 
 create unique index user_email_uindex
