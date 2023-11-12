@@ -41,6 +41,8 @@ public class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    Integer activationCode;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -63,6 +65,6 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }

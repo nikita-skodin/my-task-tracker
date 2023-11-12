@@ -1,13 +1,13 @@
 package com.skodin.controllers;
 
 import com.skodin.DTO.ProjectDTO;
-import com.skodin.exceptions.BadRequestException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
 import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.services.UserService;
+import com.skodin.util.mail.MailSandler;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,9 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +43,7 @@ public class ProjectController extends MainController {
     ProjectService projectService;
     ProjectValidator projectValidator;
     TaskStateService taskStateService;
+    private final MailSandler mailSandler;
 
     public static final String GET_PROJECTS = "/get";
     public static final String CREATE_PROJECT = "/create";
@@ -205,7 +204,6 @@ public class ProjectController extends MainController {
     }
 
     private void addStates(ProjectEntity project) {
-
         TaskStateEntity toDo = taskStateService.saveAndFlush(TaskStateEntity.builder()
                 .project(project).name("To do").build());
         TaskStateEntity inProgress = taskStateService.saveAndFlush(TaskStateEntity.builder()

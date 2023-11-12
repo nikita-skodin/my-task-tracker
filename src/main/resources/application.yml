@@ -5,8 +5,8 @@ spring:
   datasource:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driverClassName: ${DRIVER}
-    url: ${URL}
+    driverClassName: ${DB_DRIVER}
+    url: ${DB_URL}
 
   sql:
     init:
@@ -17,12 +17,27 @@ spring:
   security:
     jwt:
       secret: ${JWT_SECRET}
+#      24 hours * 1
       access: 86400000
+#      24 hours * 30
+      refresh: 2592000000
 
   liquibase:
     changeLog: classpath:liquibase/changelog.yml
-    defaultSchema: ${DEFAULT_SCHEMA}
+    defaultSchema: ${DB_DEFAULT_SCHEMA}
     enabled: false
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 #  jpa:
 #    show-sql: true
