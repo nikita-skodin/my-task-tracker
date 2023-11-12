@@ -104,7 +104,6 @@ public class AuthenticationService {
             userService.update(user1.getId(), user1);
         });
 
-
         return user.isPresent();
     }
 }
