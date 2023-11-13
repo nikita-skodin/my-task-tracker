@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: 'postgres:16'
+    container_name: 'task-tracker-postgres'
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=nikita'
+      - 'POSTGRES_DB=my-task-tracker-db'
+
+  app:
+    build: ./
+    container_name: 'java-app'
+    ports:
+      - 8081:8081
+    environment:
+      SPRING_CONFIG_LOCATION: "classpath:/application-nikita-docker.yml"
+
+

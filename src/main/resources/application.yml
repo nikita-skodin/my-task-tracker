@@ -1,12 +1,10 @@
 spring:
-  config:
-    import: file:.env[.properties]
 
   datasource:
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driverClassName: ${DB_DRIVER}
-    url: ${DB_URL}
+    username:
+    password:
+    driverClassName: org.postgresql.Driver
+    url:
 
   sql:
     init:
@@ -16,22 +14,22 @@ spring:
 
   security:
     jwt:
-      secret: ${JWT_SECRET}
-#      24 hours * 1
+      secret:
+      #      24 hours * 1
       access: 86400000
-#      24 hours * 30
+      #      24 hours * 30
       refresh: 2592000000
 
   liquibase:
     changeLog: classpath:liquibase/changelog.yml
-    defaultSchema: ${DB_DEFAULT_SCHEMA}
+    defaultSchema:
     enabled: false
 
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host:
+    port:
+    username:
+    password:
     properties:
       mail:
         smtp:
