@@ -10,6 +10,7 @@ import com.skodin.models.UserEntity;
 import com.skodin.util.mail.MailSandler;
 import com.skodin.validators.UserValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -32,6 +33,9 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final MailSandler mailSandler;
 
+    @Value("${enable.link}")
+    private String enableLink;
+
     public AuthenticationResponse register(RegisterRequest request, BindingResult bindingResult) {
         UserEntity user = UserEntity.builder()
                 .username(request.getUsername())
@@ -50,7 +54,7 @@ public class AuthenticationService {
         String accessToken = jwtService.generateAccessToken(entity);
         String refreshToken = jwtService.generateRefreshToken(entity);
 
-        String link = "localhost:8080/api/auth/enable/" + user.getActivationCode();
+        String link = enableLink + user.getActivationCode();
 
         mailSandler.sendSimpleMessage(request.getEmail(), "Confirmation", link);
 

@@ -1,3 +1,6 @@
+enable:
+  link: localhost:8080/api/auth/enable/
+
 spring:
 
   datasource:

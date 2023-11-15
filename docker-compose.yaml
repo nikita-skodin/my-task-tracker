@@ -4,16 +4,22 @@ services:
   postgres:
     image: 'postgres:16'
     container_name: 'task-tracker-postgres'
+    ports:
+      - 5432:5432
     environment:
       - 'POSTGRES_USER=postgres'
       - 'POSTGRES_PASSWORD=nikita'
       - 'POSTGRES_DB=my-task-tracker-db'
+    volumes:
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
 
   app:
-    build: ./
+    image: 'docker.pkg.github.com/nikita-skodin/task-tracker-api/task-tracker-image:2'
+#    build: ./
     container_name: 'java-app'
     ports:
-      - 8081:8081
+      - 8080:8080
     environment:
       SPRING_CONFIG_LOCATION: "classpath:/application-nikita-docker.yml"
 
