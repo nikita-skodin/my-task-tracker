@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import com.skodin.DTO.UserDTO;
@@ -35,9 +36,12 @@ public class UserController extends MainController{
 
     @GetMapping(GET_USER_BY_TOKEN)
     public ResponseEntity<UserDTO> getUserByToken() {
+        UserEntity user = UserService.getCurrentUser();
         return ResponseEntity
                 .ok()
-                .body(modelMapper.getUserDTO(UserService.getCurrentUser()));
+                .body(modelMapper
+                        .getUserDTO(userService
+                                .findById(user.getId())));
     }
 
     @GetMapping(GET_USERS)
@@ -71,21 +75,23 @@ public class UserController extends MainController{
             @PathVariable Long id,
             @RequestBody UserDTO userDTO,
             BindingResult bindingResult) {
+        // возвращаем без проектов в целях безопасностиc
 
+        // TODO: 016 добавить поментку про токен и его рефреш
         UserEntity user = modelMapper.getUser(userDTO);
+        user.setId(id);
 
-        checkUsersRules(user);
         userValidator.validate(user, bindingResult);
         checkBindingResult(bindingResult);
 
         UserEntity updated = userService.update(id, user);
-        return ResponseEntity.ok().body(modelMapper.getUserDTO(updated));
+        UserDTO dto = modelMapper.getUserDTO(updated);
+        dto.setProjects(null);
+        return ResponseEntity.ok().body(dto);
     }
 
     @DeleteMapping(DELETE_USER_BY_ID)
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        UserEntity user = userService.findById(id);
-        checkUsersRules(user);
         userService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

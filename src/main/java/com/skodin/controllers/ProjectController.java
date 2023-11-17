@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,7 +44,6 @@ public class ProjectController extends MainController {
     ProjectService projectService;
     ProjectValidator projectValidator;
     TaskStateService taskStateService;
-    private final MailSandler mailSandler;
 
     public static final String GET_PROJECTS = "/get";
     public static final String CREATE_PROJECT = "/create";

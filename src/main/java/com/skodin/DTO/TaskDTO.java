@@ -23,6 +23,7 @@ import java.time.Instant;
 public class TaskDTO {
 
     @Schema(name = "id", example = "1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Long id;
 
     @Schema(name = "name", example = "This is the name of task")
@@ -31,12 +32,12 @@ public class TaskDTO {
     @Schema(name = "description", example = "This is the description of task")
     String description;
 
-    @JsonProperty("created_at")
+    @JsonProperty(value = "created_at", access = JsonProperty.Access.READ_ONLY)
     @Builder.Default
     @Schema(name = "created_at", example = "timestamp")
     Instant createdAt = Instant.now();
 
-    @JsonProperty("task_state_id")
+    @JsonProperty(value = "task_state_id", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "task_state_id", example = "1")
     Long taskStateId;
 }

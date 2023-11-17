@@ -39,7 +39,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request, BindingResult bindingResult) {
         UserEntity user = UserEntity.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(request.getPassword())
                 .email(request.getEmail())
                 .role(Role.USER)
                 .activationCode(UUID.randomUUID().toString())
@@ -48,6 +48,8 @@ public class AuthenticationService {
         userValidator.validate(user, bindingResult);
 
         checkBindingResult(bindingResult);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         UserEntity entity = userService.saveAndFlush(user);
 
@@ -103,9 +105,7 @@ public class AuthenticationService {
         Optional<UserEntity> user = userService.findByActivationCode(code);
 
         user.ifPresent(userEntity -> {
-            userEntity.setActivationCode(null);
-            UserEntity user1 = user.get();
-            userService.update(user1.getId(), user1);
+            userService.updateEnable(user.get());
         });
 
         return user.isPresent();

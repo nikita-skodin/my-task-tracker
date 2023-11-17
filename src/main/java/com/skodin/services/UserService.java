@@ -1,11 +1,14 @@
 package com.skodin.services;
 
+import com.skodin.exceptions.ForbiddenException;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.UserEntity;
 import com.skodin.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Transient;
+import org.apache.catalina.User;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +23,15 @@ public class UserService {
     private final UserRepository userRepository;
 
     public static UserEntity getCurrentUser(){
-        return (UserEntity) SecurityContextHolder
+        Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
+
+        System.err.println(principal);
+        System.err.println(principal.getClass());
+
+        return (UserEntity) principal;
     }
 
 
@@ -33,7 +41,7 @@ public class UserService {
 
     public UserEntity findById(Long aLong) {
         return userRepository.findById(aLong).orElseThrow(
-                () -> new NotFoundException(String.format("User with id %d not found", aLong)));
+                () -> new NotFoundException(String.format("User with id %d is not found", aLong)));
     }
 
     public Optional<UserEntity> findByEmail(String email) {
@@ -54,17 +62,44 @@ public class UserService {
     }
 
     @Transactional
+    public UserEntity updateEnable(UserEntity user){
+        user.setActivationCode(null);
+        saveAndFlush(user);
+        return user;
+    }
+
+    @Transactional
     public UserEntity update(Long id, UserEntity user){
-        UserEntity byId = findById(id);
-        user.setId(byId.getId());
-        user.setActivationCode(byId.getActivationCode());
-        return saveAndFlush(user);
+        UserEntity userFromDB = findById(id);
+        checkUsersRules(userFromDB);
+
+        userFromDB.setUsername(user.getUsername());
+        userFromDB.setEmail(user.getEmail());
+
+        if (user.getPassword() != null) {
+
+            userFromDB.setPassword(new BCryptPasswordEncoder()
+                    .encode(user.getPassword()));
+        }
+
+        if (user.getActivationCode() == null){
+            userFromDB.setActivationCode(null);
+        }
+
+        System.err.println(userFromDB);
+        return saveAndFlush(userFromDB);
     }
 
     @Transactional
     public void deleteById(Long aLong) {
-        findById(aLong);    // just check
-
+        UserEntity user = findById(aLong);// just check
+        checkUsersRules(user);
         userRepository.deleteById(aLong);
+    }
+
+    private void checkUsersRules(UserEntity user) {
+        if (!user.getId().equals(UserService.getCurrentUser().getId())){
+            throw new ForbiddenException("FORBIDDEN");
+        }
     }
 }

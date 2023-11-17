@@ -26,11 +26,6 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 public abstract class MainController {
-    protected void checkUsersRules(UserEntity user) {
-        if (!user.getId().equals(UserService.getCurrentUser().getId())){
-            throw new ForbiddenException("FORBIDDEN");
-        }
-    }
 
     protected void checkBindingResult(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

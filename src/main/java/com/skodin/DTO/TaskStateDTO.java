@@ -26,6 +26,7 @@ import java.util.List;
 public class TaskStateDTO {
 
     @Schema(name = "id", example = "1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Long id;
 
     @Schema(name = "name", example = "This is the name of task state")
@@ -40,16 +41,16 @@ public class TaskStateDTO {
     Long nextTaskStateId;
 
     @Builder.Default
-    @JsonProperty("created_at")
+    @JsonProperty(value = "created_at", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "created_at", example = "timestamp")
     Instant createdAt = Instant.now();
 
-    @JsonProperty("project_id")
+    @JsonProperty(value = "project_id", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "project_id", example = "1")
     Long projectId;
 
     @Builder.Default
-    @JsonProperty("task_entities")
+    @JsonProperty(value = "task_entities", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "project_id", example = "[\n" +
             "    {\n" +
             "        \"id\": 27,\n" +

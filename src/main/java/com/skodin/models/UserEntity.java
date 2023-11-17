@@ -1,8 +1,11 @@
 package com.skodin.models;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@ToString(exclude = "projects")
+@ToString()
 @Getter
 @Setter
 @Entity
@@ -30,9 +33,11 @@ public class UserEntity implements UserDetails {
     @NotBlank(message = "username cannot be blank")
     String username;
 
+    // validate in userValidator
     String password;
 
     @Email(message = "email is invalid")
+    @NotBlank(message = "email cannot be blank")
     String email;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)

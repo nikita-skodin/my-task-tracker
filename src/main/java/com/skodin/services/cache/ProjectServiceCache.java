@@ -13,11 +13,8 @@ import org.springframework.stereotype.Service;
 public class ProjectServiceCache {
     private final ProjectRepository projectRepository;
 
-    @SneakyThrows
     @Cacheable("ProjectService::findById")
     public ProjectEntity findById(Long id) {
-        System.err.println("ProjectService::findById IS WORKING");
-        Thread.sleep(3000);
         return projectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Project with id " + id + " did not found"));
     }

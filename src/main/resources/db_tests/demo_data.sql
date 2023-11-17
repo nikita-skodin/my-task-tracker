@@ -83,7 +83,7 @@ create table if not exists "task"
 -- "user"
 INSERT INTO "user" (username, password, email, role, activation_code)
 -- password
-VALUES ('user1', '$2a$10$h8tF9AQttfqv/FjMihPtou.dV.Fimrs0e1rCT/zBFU7I/hT4qyCvO', 'user1@example.com', 'USER', '1111'),
+VALUES ('user1', '$2a$10$h8tF9AQttfqv/FjMihPtou.dV.Fimrs0e1rCT/zBFU7I/hT4qyCvO', 'user1@example.com', 'USER', null),
        ('user2', '$2a$10$h8tF9AQttfqv/FjMihPtou.dV.Fimrs0e1rCT/zBFU7I/hT4qyCvO', 'user2@example.com', 'USER', '2222');
 
 --  "project"

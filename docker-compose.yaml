@@ -10,9 +10,10 @@ services:
       - 'POSTGRES_USER=postgres'
       - 'POSTGRES_PASSWORD=nikita'
       - 'POSTGRES_DB=my-task-tracker-db'
-    volumes:
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+#      for remote deploy
+#    volumes:
+#      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+#      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
 
   app:
     image: 'docker.pkg.github.com/nikita-skodin/task-tracker-api/task-tracker-image:2'

@@ -25,6 +25,13 @@ public class UserValidator implements Validator {
     public void validate(Object target, Errors errors) {
         UserEntity user = (UserEntity) target;
 
+        String password = user.getPassword();
+
+        if (password != null && (password.length() < 8 || password.length() > 40)){
+            errors.rejectValue("password", "400",
+                    "Password length must be between 8 and 40 characters");
+        }
+
         Optional<UserEntity> byUsername = userService.findByUsername(user.getUsername());
         if (byUsername.isPresent()
         && !Objects.equals(byUsername.get().getId(), user.getId())) {
