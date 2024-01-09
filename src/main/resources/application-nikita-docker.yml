@@ -13,7 +13,7 @@ spring:
     init:
       mode: always
       continue-on-error: false
-      data-locations: classpath:db_tests/demo_data.sql
+      data-locations: classpath:db/tests/demo_data.sql
 
   security:
     jwt:

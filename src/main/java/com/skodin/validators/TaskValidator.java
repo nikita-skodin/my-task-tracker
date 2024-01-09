@@ -32,7 +32,7 @@ public class TaskValidator implements Validator {
         Optional<TaskEntity> optional = taskService
                 .findTaskEntityByNameAndTaskStateEntity(name, taskStateEntity);
 
-        if (optional.isPresent() && !Objects.equals(optional.get().getId(), taskEntity.getId())){
+        if (optional.isPresent() && !Objects.equals(optional.get().getId(), taskEntity.getId())) {
             errors.rejectValue("name", "400",
                     String.format("Task with name %s is already exist in project with id %d",
                             name, taskStateEntity.getId()));

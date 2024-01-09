@@ -1,15 +1,11 @@
 package com.skodin.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skodin.DTO.ErrorDTO;
-import com.skodin.models.UserEntity;
 import com.skodin.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -55,7 +51,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 }
             }
             // TODO: 016 попробовать перенести до филтер сюда  
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         filterChain.doFilter(servletRequest, servletResponse);
     }
 }

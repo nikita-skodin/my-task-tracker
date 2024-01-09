@@ -1,14 +1,12 @@
 package com.skodin.services;
 
 import com.skodin.exceptions.ForbiddenException;
-import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
 import com.skodin.repositories.ProjectRepository;
 import com.skodin.services.cache.ProjectServiceCache;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;

@@ -2,25 +2,26 @@ package com.skodin.services;
 
 import com.skodin.exceptions.BadRequestException;
 import com.skodin.exceptions.NotFoundException;
+import com.skodin.models.Role;
+import com.skodin.models.UserEntity;
 import com.skodin.util.auth.AuthenticationRequest;
 import com.skodin.util.auth.AuthenticationResponse;
 import com.skodin.util.auth.RegisterRequest;
-import com.skodin.models.Role;
-import com.skodin.models.UserEntity;
 import com.skodin.util.mail.MailSandler;
 import com.skodin.validators.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -64,11 +65,11 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword())
-            );
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword())
+        );
 
         UserEntity user = userService
                 .findByUsername(request.getUsername())
@@ -98,7 +99,7 @@ public class AuthenticationService {
 
     public Boolean enable(String code) {
 
-        if (code == null){
+        if (code == null) {
             throw new BadRequestException("code cannot be null");
         }
 

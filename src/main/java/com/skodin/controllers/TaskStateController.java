@@ -172,8 +172,8 @@ public class TaskStateController extends MainController {
     @Operation(
             summary = "Update Task State for project by project id and task state id",
             description = "Returns updated Task State with Tasks. Updates all fields, but if you " +
-                    "want to update order, you should change only previous element" +
-                    "For adding new Task see TaskController",
+                          "want to update order, you should change only previous element" +
+                          "For adding new Task see TaskController",
             parameters = {
                     @Parameter(
                             name = "project_id",
@@ -200,8 +200,8 @@ public class TaskStateController extends MainController {
             @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("task-state_id") Long taskStateId,
-            @PathVariable("project_id") Long projectId){
-        if (!Objects.equals(projectId, taskStateDTO.getProjectId())){
+            @PathVariable("project_id") Long projectId) {
+        if (!Objects.equals(projectId, taskStateDTO.getProjectId())) {
             throw new BadRequestException("You can not change project for Task States");
         }
 
@@ -244,7 +244,7 @@ public class TaskStateController extends MainController {
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<HttpStatus> deleteTasStateById(
             @PathVariable("project_id") Long projectId,
-            @PathVariable("task-state_id") Long taskStateId){
+            @PathVariable("task-state_id") Long taskStateId) {
         TaskStateEntity byId = taskStateService.findById(taskStateId);
         taskStateInProjectOrThrowEx(taskStateId, projectId, byId);
         taskStateService.deleteById(taskStateId);
@@ -252,7 +252,7 @@ public class TaskStateController extends MainController {
     }
 
     private void taskStateInProjectOrThrowEx(Long taskStateId, Long projectId, TaskStateEntity taskState) {
-        if (!Objects.equals(projectId, taskState.getProject().getId())){
+        if (!Objects.equals(projectId, taskState.getProject().getId())) {
             throw new NotFoundException(String.format(
                     "There is no Task State with id %d in Project with id %d", taskStateId, projectId));
         }

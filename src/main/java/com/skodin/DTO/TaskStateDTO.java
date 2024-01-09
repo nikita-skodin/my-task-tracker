@@ -1,13 +1,7 @@
 package com.skodin.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.skodin.models.ProjectEntity;
-import com.skodin.models.TaskEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -52,14 +46,14 @@ public class TaskStateDTO {
     @Builder.Default
     @JsonProperty(value = "task_entities", access = JsonProperty.Access.READ_ONLY)
     @Schema(name = "project_id", example = "[\n" +
-            "    {\n" +
-            "        \"id\": 27,\n" +
-            "        \"name\": \"task1\",\n" +
-            "        \"description\": \"description1\",\n" +
-            "        \"created_at\": \"2023-10-24T17:26:05.902537Z\",\n" +
-            "        \"task_state_id\": 146\n" +
-            "    }\n" +
-            "]")
+                                           "    {\n" +
+                                           "        \"id\": 27,\n" +
+                                           "        \"name\": \"task1\",\n" +
+                                           "        \"description\": \"description1\",\n" +
+                                           "        \"created_at\": \"2023-10-24T17:26:05.902537Z\",\n" +
+                                           "        \"task_state_id\": 146\n" +
+                                           "    }\n" +
+                                           "]")
     List<TaskDTO> taskEntities = new ArrayList<>();
 
 }

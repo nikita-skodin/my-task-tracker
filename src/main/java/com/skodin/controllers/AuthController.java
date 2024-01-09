@@ -1,15 +1,10 @@
 package com.skodin.controllers;
 
-import com.skodin.DTO.ProjectDTO;
-import com.skodin.DTO.UserDTO;
+import com.skodin.services.AuthenticationService;
 import com.skodin.util.auth.AuthenticationRequest;
 import com.skodin.util.auth.AuthenticationResponse;
 import com.skodin.util.auth.RegisterRequest;
-import com.skodin.services.AuthenticationService;
-import com.skodin.util.mail.MailSandler;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,27 +39,28 @@ public class AuthController extends MainController {
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request,
             BindingResult bindingResult
-    ){
+    ) {
         return ResponseEntity.ok(authenticationService.register(request, bindingResult));
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
-    ){
+    ) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refresh(
             @RequestBody String refreshToken
-    ){
+    ) {
         return ResponseEntity.ok(authenticationService.refresh(refreshToken));
     }
 
     @PostMapping("/enable/{code}")
     public ResponseEntity<Boolean> enable(
-            @PathVariable String code){
+            @PathVariable String code) {
+        // TODO move the code to the header
         return ResponseEntity.ok(authenticationService.enable(code));
     }
 

@@ -34,7 +34,7 @@ public class TaskStateValidator implements Validator {
                 .findTaskStateEntityByNameAndProject(name, project);
 
         if (entityByNameAndProject.isPresent() &&
-                !Objects.equals(entityByNameAndProject.get().getId(), taskStateEntity.getId())){
+            !Objects.equals(entityByNameAndProject.get().getId(), taskStateEntity.getId())) {
             errors.rejectValue("name", "400",
                     String.format("Task State with name %s is already exist in project with id %d",
                             name, project.getId()));

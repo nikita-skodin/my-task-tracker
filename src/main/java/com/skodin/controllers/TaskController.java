@@ -208,8 +208,8 @@ public class TaskController extends MainController {
             @PathVariable("task_id") Long taskId,
             @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
-        if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)){
-           throw new BadRequestException("Id in DTO and in url must be the same");
+        if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)) {
+            throw new BadRequestException("Id in DTO and in url must be the same");
         }
 
         taskDTO.setId(taskId);

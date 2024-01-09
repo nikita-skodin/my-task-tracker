@@ -1,10 +1,6 @@
 package com.skodin.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.skodin.models.ProjectEntity;
-import com.skodin.models.Role;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

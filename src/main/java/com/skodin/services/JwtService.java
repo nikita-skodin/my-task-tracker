@@ -1,7 +1,6 @@
 package com.skodin.services;
 
 import com.skodin.exceptions.InvalidToken;
-import com.skodin.models.UserEntity;
 import com.skodin.util.auth.AuthenticationResponse;
 import com.skodin.util.auth.JWTProperties;
 import io.jsonwebtoken.Claims;
@@ -9,19 +8,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -45,7 +41,7 @@ public class JwtService {
 
     public String generateAccessToken(@NotNull Map<String, Object> extractClaims, UserDetails userDetails) {
 
-        if (extractClaims == null){
+        if (extractClaims == null) {
             extractClaims = Collections.emptyMap();
         }
 
@@ -65,7 +61,7 @@ public class JwtService {
 
     public String generateRefreshToken(@NotNull Map<String, Object> extractClaims, UserDetails userDetails) {
 
-        if (extractClaims == null){
+        if (extractClaims == null) {
             extractClaims = Collections.emptyMap();
         }
 
@@ -79,8 +75,8 @@ public class JwtService {
                 .compact();
     }
 
-    public AuthenticationResponse refreshUserToken(String refreshToken){
-        if (!isTokenValid(refreshToken)){
+    public AuthenticationResponse refreshUserToken(String refreshToken) {
+        if (!isTokenValid(refreshToken)) {
             throw new InvalidToken("Token is invalid");
         }
 

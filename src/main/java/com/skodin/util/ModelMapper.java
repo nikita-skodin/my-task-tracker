@@ -8,7 +8,6 @@ import com.skodin.models.ProjectEntity;
 import com.skodin.models.TaskEntity;
 import com.skodin.models.TaskStateEntity;
 import com.skodin.models.UserEntity;
-import com.skodin.services.TaskService;
 import com.skodin.services.TaskStateService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.AbstractConverter;

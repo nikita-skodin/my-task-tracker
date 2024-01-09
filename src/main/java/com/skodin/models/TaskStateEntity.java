@@ -2,7 +2,6 @@ package com.skodin.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -50,23 +49,23 @@ public class TaskStateEntity {
     @OneToMany(mappedBy = "taskStateEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     List<TaskEntity> taskEntities = new ArrayList<>();
 
-    public Optional<TaskStateEntity> getPreviousTaskState(){
+    public Optional<TaskStateEntity> getPreviousTaskState() {
         return Optional.ofNullable(previousTaskState);
     }
 
-    public Optional<TaskStateEntity> getNextTaskState(){
+    public Optional<TaskStateEntity> getNextTaskState() {
         return Optional.ofNullable(nextTaskState);
     }
 
     @Override
     public String toString() {
         return "TaskStateEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", previousTaskStateId=" + (previousTaskState == null ? null : previousTaskState.getId()) +
-                ", nextTaskStateId=" + (nextTaskState == null ? null : nextTaskState.getId()) +
-                ", createdAt=" + createdAt +
-                ", taskEntities=" + taskEntities +
-                '}';
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", previousTaskStateId=" + (previousTaskState == null ? null : previousTaskState.getId()) +
+               ", nextTaskStateId=" + (nextTaskState == null ? null : nextTaskState.getId()) +
+               ", createdAt=" + createdAt +
+               ", taskEntities=" + taskEntities +
+               '}';
     }
 }

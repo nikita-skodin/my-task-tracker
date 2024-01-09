@@ -41,7 +41,7 @@ public class MyTaskTrackerApplication {
     }
 
     @Bean
-    public OpenAPI openAPI(){
+    public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
                         .title("Task Tracker API")
@@ -68,14 +68,14 @@ public class MyTaskTrackerApplication {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return username -> userService.findByUsername(username).orElseThrow(
                 () -> new NotFoundException(String.format("User with username %s not found", username)
                 ));
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());

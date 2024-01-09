@@ -5,10 +5,8 @@ import com.skodin.exceptions.NotFoundException;
 import com.skodin.models.UserEntity;
 import com.skodin.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public static UserEntity getCurrentUser(){
+    public static UserEntity getCurrentUser() {
         Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -62,14 +60,14 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity updateEnable(UserEntity user){
+    public UserEntity updateEnable(UserEntity user) {
         user.setActivationCode(null);
         saveAndFlush(user);
         return user;
     }
 
     @Transactional
-    public UserEntity update(Long id, UserEntity user){
+    public UserEntity update(Long id, UserEntity user) {
         UserEntity userFromDB = findById(id);
         checkUsersRules(userFromDB);
 
@@ -82,7 +80,7 @@ public class UserService {
                     .encode(user.getPassword()));
         }
 
-        if (user.getActivationCode() == null){
+        if (user.getActivationCode() == null) {
             userFromDB.setActivationCode(null);
         }
 
@@ -98,7 +96,7 @@ public class UserService {
     }
 
     private void checkUsersRules(UserEntity user) {
-        if (!user.getId().equals(UserService.getCurrentUser().getId())){
+        if (!user.getId().equals(UserService.getCurrentUser().getId())) {
             throw new ForbiddenException("FORBIDDEN");
         }
     }

@@ -12,7 +12,6 @@ import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -133,8 +132,8 @@ class ProjectControllerTest extends MainController {
     @Test
     void getProjectById_ReturnsValidResponseEntity() {
         // setup
-        ProjectEntity project =  new ProjectEntity(ID, "TestName1", NOW, USER, new ArrayList<>());
-        ProjectDTO projectDTO =  new ProjectDTO(ID, "TestName1", NOW, USER.getId(), new ArrayList<>());
+        ProjectEntity project = new ProjectEntity(ID, "TestName1", NOW, USER, new ArrayList<>());
+        ProjectDTO projectDTO = new ProjectDTO(ID, "TestName1", NOW, USER.getId(), new ArrayList<>());
 
         when(projectService.findById(ID)).thenReturn(project);
         when(modelMapper.getProjectDTO(project)).thenReturn(projectDTO);
@@ -155,11 +154,11 @@ class ProjectControllerTest extends MainController {
     @Test
     void createProject_ReturnsValidProjectDTO() {
         // setup
-        ProjectDTO projectDTO =  new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
-        ProjectEntity project =  new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
+        ProjectDTO projectDTO = new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
+        ProjectEntity project = new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
 
-        ProjectEntity returnedProject =  new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
-        ProjectDTO returnedProjectDTO =  new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
+        ProjectEntity returnedProject = new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
+        ProjectDTO returnedProjectDTO = new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
 
         when(modelMapper.getProject(projectDTO)).thenReturn(project);
         doNothing().when(projectValidator).validate(project, bindingResult);
@@ -212,11 +211,11 @@ class ProjectControllerTest extends MainController {
     @Test
     void updateProject_ReturnsValidResponseEntity() {
         // setup
-        ProjectDTO projectDTO =  new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
-        ProjectEntity project =  new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
+        ProjectDTO projectDTO = new ProjectDTO(null, "name", NOW, null, new ArrayList<>());
+        ProjectEntity project = new ProjectEntity(null, "name", NOW, null, new ArrayList<>());
 
-        ProjectEntity updatedProject =  new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
-        ProjectDTO returnedProjectDTO =  new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
+        ProjectEntity updatedProject = new ProjectEntity(ID, "name", NOW, USER, new ArrayList<>());
+        ProjectDTO returnedProjectDTO = new ProjectDTO(ID, "name", NOW, USER.getId(), new ArrayList<>());
 
         when(modelMapper.getProject(projectDTO)).thenReturn(project);
         when(modelMapper.getProjectDTO(updatedProject)).thenReturn(returnedProjectDTO);
@@ -236,23 +235,6 @@ class ProjectControllerTest extends MainController {
 
         verify(projectService, times(1)).update(ID, project);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

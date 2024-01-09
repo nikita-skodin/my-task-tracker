@@ -39,11 +39,11 @@ public class TaskStateService {
         Optional<TaskStateEntity> lastState = taskStateRepository
                 .findTaskStateEntityByNextTaskStateNullAndProject(entity.getProject());
 
-        if (lastState.isPresent()){
+        if (lastState.isPresent()) {
             lastState.get().setNextTaskState(entity);
             entity.setPreviousTaskState(lastState.get());
             entity.setNextTaskState(null);
-        }else {
+        } else {
             entity.setPreviousTaskState(null);
             entity.setNextTaskState(null);
         }

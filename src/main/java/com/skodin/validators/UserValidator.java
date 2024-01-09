@@ -27,21 +27,21 @@ public class UserValidator implements Validator {
 
         String password = user.getPassword();
 
-        if (password != null && (password.length() < 8 || password.length() > 40)){
+        if (password != null && (password.length() < 8 || password.length() > 40)) {
             errors.rejectValue("password", "400",
                     "Password length must be between 8 and 40 characters");
         }
 
         Optional<UserEntity> byUsername = userService.findByUsername(user.getUsername());
         if (byUsername.isPresent()
-        && !Objects.equals(byUsername.get().getId(), user.getId())) {
+            && !Objects.equals(byUsername.get().getId(), user.getId())) {
             errors.rejectValue("username", "400",
                     "User with username " + user.getUsername() + " is already exist");
         }
 
         Optional<UserEntity> byEmail = userService.findByEmail(user.getEmail());
         if (byEmail.isPresent()
-                && !Objects.equals(byEmail.get().getId(), user.getId())) {
+            && !Objects.equals(byEmail.get().getId(), user.getId())) {
             errors.rejectValue("email", "400",
                     "User with email " + user.getEmail() + " is already exist");
         }

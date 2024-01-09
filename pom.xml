@@ -21,7 +21,6 @@
         <jwt.version>0.11.5</jwt.version>
         <lombok.version>1.18.30</lombok.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <liquibase.version>4.24.0</liquibase.version>
         <postgresql.version>42.6.0</postgresql.version>
         <modelmapper.version>3.2.0</modelmapper.version>
         <spring.security.version>6.1.5</spring.security.version>
@@ -55,7 +54,6 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -75,9 +73,12 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
 
         <dependency>
@@ -101,14 +102,6 @@
             <version>${modelmapper.version}</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.version}</version>
-        </dependency>
-
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -126,7 +119,6 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jwt.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>
