@@ -1,17 +1,19 @@
+server:
+  port: 8080
+
 enable:
-  link: localhost:8080/api/auth/enable/
+  link: http://localhost:${server.port}/api/auth/enable/
 
 spring:
-
   datasource:
     username:
     password:
     driverClassName: org.postgresql.Driver
-    url:
+    url: jdbc:postgresql://localhost:5432/
 
   sql:
     init:
-      mode: always
+      mode: never
       continue-on-error: false
       data-locations: classpath:db/tests/demo_data.sql
 
@@ -23,14 +25,9 @@ spring:
       #      24 hours * 30
       refresh: 2592000000
 
-  liquibase:
-    changeLog: classpath:liquibase/changelog.yml
-    defaultSchema:
-    enabled: false
-
   mail:
-    host:
-    port:
+    host: smtp.gmail.com
+    port: 587
     username:
     password:
     properties:
@@ -40,10 +37,13 @@ spring:
           starttls:
             enable: true
 
-#  jpa:
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: create-drop
-#    properties:
-#      hibernate:
-#        format_sql: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
