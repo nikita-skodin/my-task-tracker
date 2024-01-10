@@ -57,10 +57,9 @@ public class AuthController extends MainController {
         return ResponseEntity.ok(authenticationService.refresh(refreshToken));
     }
 
-    @PostMapping("/enable/{code}")
+    @GetMapping("/enable/{code}")
     public ResponseEntity<Boolean> enable(
             @PathVariable String code) {
-        // TODO move the code to the header
         return ResponseEntity.ok(authenticationService.enable(code));
     }
 

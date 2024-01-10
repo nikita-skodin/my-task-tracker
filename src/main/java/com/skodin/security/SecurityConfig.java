@@ -25,18 +25,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        auth -> {
-                            auth
-                                    .requestMatchers(
-                                            "/api/auth/**",
-                                            "/v3/api-docs/**",
-                                            "/swagger-ui/**")
-                                    .permitAll()
-                                    .anyRequest()
-                                    .authenticated();
-                        }
+                        auth -> auth
+                                .requestMatchers(
+                                        "/api/auth/**",
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(((request, response, authException) ->
@@ -53,9 +52,7 @@ public class SecurityConfig {
                             ErrorDTO errorResponse = new ErrorDTO("FORBIDDEN", "Access Denied");
                             response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
                         }))
-                .sessionManagement(manager -> {
-                    manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
+                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

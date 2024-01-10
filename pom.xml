@@ -55,6 +55,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
@@ -94,7 +99,6 @@
             <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
-
 
         <dependency>
             <groupId>org.modelmapper</groupId>

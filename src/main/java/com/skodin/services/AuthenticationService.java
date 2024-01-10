@@ -59,7 +59,7 @@ public class AuthenticationService {
 
         String link = enableLink + user.getActivationCode();
 
-        mailSandler.sendSimpleMessage(request.getEmail(), "Confirmation", link);
+        mailSandler.sendActivationCodeMessage(request.getEmail(), "Confirm your email", link, user.getUsername());
 
         return new AuthenticationResponse(accessToken, refreshToken);
     }
@@ -105,9 +105,7 @@ public class AuthenticationService {
 
         Optional<UserEntity> user = userService.findByActivationCode(code);
 
-        user.ifPresent(userEntity -> {
-            userService.updateEnable(user.get());
-        });
+        user.ifPresent(userEntity -> userService.updateEnable(user.get()));
 
         return user.isPresent();
     }
