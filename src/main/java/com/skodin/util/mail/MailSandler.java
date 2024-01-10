@@ -26,16 +26,13 @@ public class MailSandler {
 
 
     @Async
-    @SneakyThrows
-    // TODO
     public void sendActivationCodeMessage(String to, String subject, String link, String userName) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             Context context = new Context();
 
             context.setVariables(Map.of("name", userName, "url", link));
-            log.info(link);
-            String text = templateEngine.process("emailtemplate", context);
+            String text = templateEngine.process("emailTemplate", context);
 
             MimeMultipart mimeMultipart = new MimeMultipart("html");
             BodyPart messageBodyPart = new MimeBodyPart();
@@ -48,7 +45,6 @@ public class MailSandler {
 
             mailSender.send(message);
         } catch (Exception exception) {
-            System.out.println(exception.getMessage());
             throw new RuntimeException(exception.getMessage());
         }
 
