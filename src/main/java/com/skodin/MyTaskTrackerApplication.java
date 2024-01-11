@@ -3,8 +3,6 @@ package com.skodin;
 import com.skodin.exceptions.NotFoundException;
 import com.skodin.services.UserService;
 import com.skodin.util.mail.MailProperties;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,15 +36,6 @@ public class MyTaskTrackerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MyTaskTrackerApplication.class, args);
-    }
-
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Task Tracker API")
-                        .description("Spring Boot Application")
-                        .version("1.0"));
     }
 
     @Bean

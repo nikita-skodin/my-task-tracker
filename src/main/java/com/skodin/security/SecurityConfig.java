@@ -30,8 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
                                 .requestMatchers(
+                                        "/v3/**",
                                         "/api/auth/**",
-                                        "/v3/api-docs/**",
                                         "/swagger-ui/**")
                                 .permitAll()
                                 .anyRequest()

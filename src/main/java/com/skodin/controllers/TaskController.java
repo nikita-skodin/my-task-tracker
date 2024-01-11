@@ -12,12 +12,6 @@ import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.util.ProjectTaskStateTuple;
 import com.skodin.validators.TaskValidator;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -52,24 +46,6 @@ public class TaskController extends MainController {
     public static final String DELETE_TASK_BY_ID = "/delete/{task_id}";
 
     @GetMapping(GET_ALL_TASKS)
-    @Operation(
-            summary = "Get Tasks for Task State by project id and task state id",
-            description = "Returns all Tasks",
-            parameters = {
-                    @Parameter(
-                            name = "project_id",
-                            description = "project id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task-state_id",
-                            description = "task state id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation")
-            }
-    )
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<List<TaskDTO>> getTasks(
             @PathVariable("project_id") Long projectId,
@@ -87,31 +63,6 @@ public class TaskController extends MainController {
     }
 
     @GetMapping(GET_TASK_BY_ID)
-    @Operation(
-            summary = "Get Tasks for Task State by project id, task state id and task id",
-            description = "Returns all Tasks",
-            parameters = {
-                    @Parameter(
-                            name = "project_id",
-                            description = "project id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task-state_id",
-                            description = "task state id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task_id",
-                            description = "task id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation"),
-                    @ApiResponse(responseCode = "400", description = "Bad request"),
-                    @ApiResponse(responseCode = "404", description = "Not found")
-            }
-    )
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> getTaskById(
             @PathVariable("project_id") Long projectId,
@@ -128,30 +79,6 @@ public class TaskController extends MainController {
 
     @SneakyThrows
     @PostMapping(ADD_NEW_TASK)
-    @Operation(
-            summary = "Create Task for Task State",
-            description = "Create new Task",
-            parameters = {
-                    @Parameter(
-                            name = "project_id",
-                            description = "project id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task-state_id",
-                            description = "task state id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "empty JSON taskDTO",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = TaskDTO.class))),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation"),
-                    @ApiResponse(responseCode = "400", description = "Bad request")
-            }
-    )
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> createTask(
             @PathVariable("project_id") Long projectId,
@@ -176,31 +103,6 @@ public class TaskController extends MainController {
     }
 
     @PatchMapping(UPDATE_TASK_BY_ID)
-    @Operation(
-            summary = "Update Task",
-            description = "Returns updated Task",
-            parameters = {
-                    @Parameter(
-                            name = "project_id",
-                            description = "project id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task-state_id",
-                            description = "task state id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task_id",
-                            description = "task id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation"),
-                    @ApiResponse(responseCode = "400", description = "Bad request"),
-                    @ApiResponse(responseCode = "404", description = "Not found")
-            }
-    )
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskDTO> updateTaskById(
             @PathVariable("project_id") Long projectId,
@@ -228,31 +130,6 @@ public class TaskController extends MainController {
     }
 
     @DeleteMapping(DELETE_TASK_BY_ID)
-    @Operation(
-            summary = "Delete Task",
-            description = "Delete Task",
-            parameters = {
-                    @Parameter(
-                            name = "project_id",
-                            description = "project id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task-state_id",
-                            description = "task state id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long")),
-                    @Parameter(
-                            name = "task_id",
-                            description = "task id",
-                            in = ParameterIn.PATH,
-                            schema = @Schema(type = "long"))},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation"),
-                    @ApiResponse(responseCode = "400", description = "Bad request"),
-                    @ApiResponse(responseCode = "404", description = "Not found")
-            }
-    )
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<HttpStatus> deleteTaskById(
             @PathVariable("project_id") Long projectId,

@@ -73,9 +73,7 @@ public class UserController extends MainController {
             @PathVariable Long id,
             @RequestBody UserDTO userDTO,
             BindingResult bindingResult) {
-        // возвращаем без проектов в целях безопасностиc
 
-        // TODO: 016 добавить поментку про токен и его рефреш
         UserEntity user = modelMapper.getUser(userDTO);
         user.setId(id);
 
@@ -84,7 +82,9 @@ public class UserController extends MainController {
 
         UserEntity updated = userService.update(id, user);
         UserDTO dto = modelMapper.getUserDTO(updated);
-        dto.setProjects(null);
+        dto.setProjects(null);  //  return it without projects for security reasons
+        // TODO подумать как тут можно забирать кастомным запросом без проектов для понижения нагрузки на бд
+
         return ResponseEntity.ok().body(dto);
     }
 

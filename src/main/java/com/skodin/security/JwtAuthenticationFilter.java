@@ -52,6 +52,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             }
             // TODO: 016 попробовать перенести до филтер сюда  
         } catch (Exception ignored) {
+
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
