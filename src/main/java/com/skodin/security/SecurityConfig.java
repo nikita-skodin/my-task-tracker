@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
                                 .requestMatchers(
+                                        "/actuator/**",
+                                        "/error",
                                         "/v3/**",
                                         "/api/auth/**",
                                         "/swagger-ui/**")
@@ -42,16 +44,16 @@ public class SecurityConfig {
                         {
                             response.setContentType("application/json");
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            ErrorDTO errorResponse = new ErrorDTO("UNAUTHORIZED", "Incorrect data");
+                            ErrorDTO errorResponse = new ErrorDTO("Unauthorized", "Incorrect data");
                             response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
-                        }
-                        ))
+                        }))
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpStatus.FORBIDDEN.value());
-                            ErrorDTO errorResponse = new ErrorDTO("FORBIDDEN", "Access Denied");
+                            ErrorDTO errorResponse = new ErrorDTO("Forbidden", "Access Denied");
                             response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
-                        }))
+                        })
+                )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -20,7 +20,7 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 
     private static final String PATH = "/error";
 
-    ErrorAttributes errorAttributes;
+    private final ErrorAttributes errorAttributes;
 
     @RequestMapping(PATH)
     public ResponseEntity<ErrorDTO> error(WebRequest webRequest) {

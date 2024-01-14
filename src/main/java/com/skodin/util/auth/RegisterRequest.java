@@ -1,5 +1,7 @@
 package com.skodin.util.auth;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-    private String username;
-    private String password;
+
+    @Email(message = "email is invalid")
+    @NotBlank(message = "email cannot be blank")
     private String email;
+
+    @NotBlank(message = "username cannot be blank")
+    private String username;
+
+    private String password;
+
 }

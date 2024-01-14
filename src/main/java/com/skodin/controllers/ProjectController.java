@@ -9,6 +9,7 @@ import com.skodin.services.TaskStateService;
 import com.skodin.services.UserService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.ProjectValidator;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Validated
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RestController
 @RequestMapping("/api/projects")
@@ -72,7 +75,7 @@ public class ProjectController extends MainController {
 
     @PostMapping(CREATE_PROJECT)
     public ResponseEntity<ProjectDTO> createProject(
-            @RequestBody ProjectDTO projectDTO,
+            @Valid @RequestBody ProjectDTO projectDTO,
             BindingResult bindingResult
     ) {
 
@@ -96,7 +99,7 @@ public class ProjectController extends MainController {
 
     @PatchMapping(UPDATE_PROJECT_BY_ID)
     public ResponseEntity<ProjectDTO> updateProject(
-            @RequestBody ProjectDTO projectDTO,
+            @Valid @RequestBody ProjectDTO projectDTO,
             @PathVariable Long id,
             BindingResult bindingResult) {
 

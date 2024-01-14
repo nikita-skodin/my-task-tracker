@@ -11,8 +11,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ErrorDTO {
-
     String error;
-
     String message;
 }

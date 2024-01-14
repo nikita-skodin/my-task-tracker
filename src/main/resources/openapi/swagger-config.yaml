@@ -1,17 +1,126 @@
----
-openapi: 3.0.1
+openapi: 3.1.0
 info:
-  title: OpenAPI definition
-  version: v0
+  title: Task Tracker definition
+  description: Documentation for Task Tracker API
+  version: v1.0
 servers:
   - url: http://localhost:8080
-    description: Generated server url
-tags:
-  - name: Projects
-    description: Operations related to projects
-  - name: Authentication
-    description: Authentication operations
+    description: Main url
+
 paths:
+  /api/auth/register:
+    post:
+      summary: Register new user
+      tags:
+        - Authentication
+      requestBody:
+        description: User registration request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Invalid data response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/authenticate:
+    post:
+      summary: Authenticate a user
+      tags:
+        - Authentication
+      requestBody:
+        description: User authentication request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '401':
+          description: Incorrect data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh authentication token
+      tags:
+        - Authentication
+      requestBody:
+        description: User`s refresh token
+        required: true
+        content:
+          application/text:
+            schema:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      responses:
+        '200':
+          description: Token successfully refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '403':
+          description: Invalid Token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/enable/{code}:
+    get:
+      summary: Enable user account using activation code
+      tags:
+        - Authentication
+      parameters:
+        - name: code
+          in: path
+          description: Activation code
+          required: true
+          schema:
+            type: string
+            example: fcf7303e-63d5-4a36-958a-400eec69acc8
+      responses:
+        '200':
+          description: Account enabled successfully
+          content:
+            application/text:
+              schema:
+                type: string
+                example: Account successfully activated
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   "/api/projects/{project_id}/task-states/{task-states_id}/tasks/create":
     post:
       tags:
@@ -51,7 +160,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/projects/{project_id}/task-states/create":
     post:
       tags:
@@ -85,7 +195,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskStateDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/projects/create":
     post:
       tags:
@@ -112,70 +223,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/ProjectDTO"
-  "/api/auth/register":
-    post:
-      tags:
-        - Authentication
-      summary: Register new user
-      description: Register new user
-      operationId: register
-      requestBody:
-        description: empty JSON RegisterRequest
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/RegisterRequest"
-        required: true
-      responses:
-        '200':
-          description: Successfully created
-          content:
-            "*/*":
-              schema:
-                "$ref": "#/components/schemas/AuthenticationResponse"
-        '400':
-          description: Bad request
-          content:
-            "*/*":
-              schema:
-                "$ref": "#/components/schemas/AuthenticationResponse"
-  "/api/auth/refresh":
-    post:
-      tags:
-        - Authentication
-      operationId: refresh
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            "*/*":
-              schema:
-                "$ref": "#/components/schemas/AuthenticationResponse"
-  "/api/auth/authenticate":
-    post:
-      tags:
-        - Authentication
-      operationId: authenticate
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/AuthenticationRequest"
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            "*/*":
-              schema:
-                "$ref": "#/components/schemas/AuthenticationResponse"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/users/update/{id}":
     patch:
       tags:
@@ -201,6 +250,7 @@ paths:
             "*/*":
               schema:
                 "$ref": "#/components/schemas/UserDTO"
+
   "/api/projects/{project_id}/task-states/{task-states_id}/tasks/update/{task_id}":
     patch:
       tags:
@@ -245,13 +295,14 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
         '404':
           description: Not found
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/projects/{project_id}/task-states/update/{task-state_id}":
     patch:
       tags:
@@ -293,7 +344,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskStateDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/projects/update/{id}":
     patch:
       tags:
@@ -329,7 +381,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/ProjectDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/users/get":
     get:
       tags:
@@ -442,13 +495,14 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
         '404':
           description: Not found
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/projects/{project_id}/task-states/get":
     get:
       tags:
@@ -504,7 +558,7 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/TaskStateDTO"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/api/projects/get":
     get:
       tags:
@@ -558,25 +612,8 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/ProjectDTO"
-  "/api/auth/enable/{code}":
-    get:
-      tags:
-        - Authentication
-      operationId: enable
-      parameters:
-        - name: code
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            "*/*":
-              schema:
-                type: boolean
+                "$ref": "#/components/schemas/ErrorResponse"
+
   "/api/users/delete/{id}":
     delete:
       tags:
@@ -592,6 +629,7 @@ paths:
       responses:
         '200':
           description: OK
+
   "/api/projects/{project_id}/task-states/{task-states_id}/tasks/delete/{task_id}":
     delete:
       tags:
@@ -626,75 +664,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
                   - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
-                  - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
         '400':
           description: Bad request
           content:
@@ -702,75 +672,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
-                  - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
                   - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
         '404':
           description: Not found
           content:
@@ -778,75 +680,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
-                  - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
-                  - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
                   - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
   "/api/projects/{project_id}/task-states/delete/{task-state_id}":
     delete:
       tags:
@@ -875,75 +709,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
                   - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
-                  - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
         '400':
           description: Bad Request
           content:
@@ -951,75 +717,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
-                  - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
                   - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
         '404':
           description: Not found
           content:
@@ -1027,75 +725,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
-                  - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
-                  - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
                   - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
   "/api/projects/delete/{id}":
     delete:
       tags:
@@ -1118,75 +748,7 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
                   - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
-                  - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
         '400':
           description: Bad request
           content:
@@ -1194,77 +756,73 @@ paths:
               schema:
                 type: string
                 enum:
-                  - 100 CONTINUE
-                  - 101 SWITCHING_PROTOCOLS
-                  - 102 PROCESSING
-                  - 103 EARLY_HINTS
-                  - 103 CHECKPOINT
-                  - 200 OK
-                  - 201 CREATED
-                  - 202 ACCEPTED
-                  - 203 NON_AUTHORITATIVE_INFORMATION
-                  - 204 NO_CONTENT
-                  - 205 RESET_CONTENT
-                  - 206 PARTIAL_CONTENT
-                  - 207 MULTI_STATUS
-                  - 208 ALREADY_REPORTED
-                  - 226 IM_USED
-                  - 300 MULTIPLE_CHOICES
-                  - 301 MOVED_PERMANENTLY
-                  - 302 FOUND
-                  - 302 MOVED_TEMPORARILY
-                  - 303 SEE_OTHER
-                  - 304 NOT_MODIFIED
-                  - 305 USE_PROXY
-                  - 307 TEMPORARY_REDIRECT
-                  - 308 PERMANENT_REDIRECT
                   - 400 BAD_REQUEST
-                  - 401 UNAUTHORIZED
-                  - 402 PAYMENT_REQUIRED
-                  - 403 FORBIDDEN
-                  - 404 NOT_FOUND
-                  - 405 METHOD_NOT_ALLOWED
-                  - 406 NOT_ACCEPTABLE
-                  - 407 PROXY_AUTHENTICATION_REQUIRED
-                  - 408 REQUEST_TIMEOUT
-                  - 409 CONFLICT
-                  - 410 GONE
-                  - 411 LENGTH_REQUIRED
-                  - 412 PRECONDITION_FAILED
-                  - 413 PAYLOAD_TOO_LARGE
-                  - 413 REQUEST_ENTITY_TOO_LARGE
-                  - 414 URI_TOO_integer
-                  - 414 REQUEST_URI_TOO_integer
-                  - 415 UNSUPPORTED_MEDIA_TYPE
-                  - 416 REQUESTED_RANGE_NOT_SATISFIABLE
-                  - 417 EXPECTATION_FAILED
-                  - 418 I_AM_A_TEAPOT
-                  - 419 INSUFFICIENT_SPACE_ON_RESOURCE
-                  - 420 METHOD_FAILURE
-                  - 421 DESTINATION_LOCKED
-                  - 422 UNPROCESSABLE_ENTITY
-                  - 423 LOCKED
-                  - 424 FAILED_DEPENDENCY
-                  - 425 TOO_EARLY
-                  - 426 UPGRADE_REQUIRED
-                  - 428 PRECONDITION_REQUIRED
-                  - 429 TOO_MANY_REQUESTS
-                  - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
-                  - 451 UNAVAILABLE_FOR_LEGAL_REASONS
-                  - 500 INTERNAL_SERVER_ERROR
-                  - 501 NOT_IMPLEMENTED
-                  - 502 BAD_GATEWAY
-                  - 503 SERVICE_UNAVAILABLE
-                  - 504 GATEWAY_TIMEOUT
-                  - 505 HTTP_VERSION_NOT_SUPPORTED
-                  - 506 VARIANT_ALSO_NEGOTIATES
-                  - 507 INSUFFICIENT_STORAGE
-                  - 508 LOOP_DETECTED
-                  - 509 BANDWIDTH_LIMIT_EXCEEDED
-                  - 510 NOT_EXTENDED
-                  - 511 NETWORK_AUTHENTICATION_REQUIRED
+
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error`s title
+          example: Bad Request
+        message:
+          type: string
+          description: Error`s message
+          example: Some cause
+
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User's username
+          example: UserName
+        password:
+          type: string
+          example: UserPassword123
+          description: User`s password
+        email:
+          type: string
+          format: email
+          example: email@gmail.com
+          description: User's email address
+      required:
+        - username
+        - password
+        - email
+
+    AuthenticationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User's username
+          example: Josh_J
+        password:
+          type: string
+          example: password_password_123
+          description: User`s password
+      required:
+        - username
+        - password
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          description: access JWT token
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          description: refresh JWT token
+      required:
+        - access_token
+        - refresh_token
+
     TaskDTO:
       type: object
       properties:
@@ -1336,7 +894,7 @@ components:
           next_task_state_id: 146
           created_at: '2023-10-24T17:16:43.498700Z'
           project_id: 57
-          task_entities: []
+          task_entities: [ ]
     ProjectDTO:
       type: object
       properties:
@@ -1366,32 +924,9 @@ components:
               next_task_state_id: 146
               created_at: '2023-10-24T17:16:43.498700Z'
               project_id: 57
-              task_entities: []
+              task_entities: [ ]
           items:
             "$ref": "#/components/schemas/TaskStateDTO"
-    RegisterRequest:
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-        email:
-          type: string
-    AuthenticationResponse:
-      type: object
-      properties:
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-    AuthenticationRequest:
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
     UserDTO:
       type: object
       properties:

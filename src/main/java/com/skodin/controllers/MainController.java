@@ -29,19 +29,19 @@ public abstract class MainController {
     }
 
     @ExceptionHandler
-    protected ResponseEntity<ErrorDTO> handleException(ConstraintViolationException e) {
+    protected ResponseEntity<ErrorDTO> handleException(ConstraintViolationException e ) {
 
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
 
         StringBuilder response = new StringBuilder();
 
         for (var el : constraintViolations) {
-            response.append(el.getMessage()).append("; ");
+            response.append(el.getMessage()).append(";" );
         }
 
         return ResponseEntity
                 .status(400)
-                .body(new ErrorDTO("BAD_REQUEST", response.toString()));
-
+                .body(new ErrorDTO("BAD_REQUEST", response.toString().trim()));
     }
+
 }

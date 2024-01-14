@@ -5,17 +5,20 @@ import com.skodin.models.UserEntity;
 import com.skodin.services.UserService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.UserValidator;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @RestController
@@ -71,7 +74,7 @@ public class UserController extends MainController {
     @PatchMapping(UPDATE_USER_BY_ID)
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @RequestBody UserDTO userDTO,
+            @Valid @RequestBody UserDTO userDTO,
             BindingResult bindingResult) {
 
         UserEntity user = modelMapper.getUser(userDTO);
@@ -83,7 +86,6 @@ public class UserController extends MainController {
         UserEntity updated = userService.update(id, user);
         UserDTO dto = modelMapper.getUserDTO(updated);
         dto.setProjects(null);  //  return it without projects for security reasons
-        // TODO подумать как тут можно забирать кастомным запросом без проектов для понижения нагрузки на бд
 
         return ResponseEntity.ok().body(dto);
     }

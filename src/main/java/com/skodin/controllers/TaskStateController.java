@@ -8,6 +8,7 @@ import com.skodin.services.ProjectService;
 import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.validators.TaskStateValidator;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,10 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * проверка на существование проекта с id
- * происходит при конвертации из DTO
- */
+@Validated
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @RestController
@@ -76,7 +75,7 @@ public class TaskStateController extends MainController {
     @PostMapping(CREATE_TASK_STATE)
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#id)")
     public ResponseEntity<TaskStateDTO> createTaskState(
-            @RequestBody TaskStateDTO taskStateDTO,
+            @Valid @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("project_id") Long id) {
 
@@ -109,7 +108,7 @@ public class TaskStateController extends MainController {
     @PatchMapping(UPDATE_TASK_STATE_BY_ID)
     @PreAuthorize("@projectSecurityExpression.checkUserProjectAccess(#projectId)")
     public ResponseEntity<TaskStateDTO> updateProject(
-            @RequestBody TaskStateDTO taskStateDTO,
+            @Valid @RequestBody TaskStateDTO taskStateDTO,
             BindingResult bindingResult,
             @PathVariable("task-state_id") Long taskStateId,
             @PathVariable("project_id") Long projectId) {

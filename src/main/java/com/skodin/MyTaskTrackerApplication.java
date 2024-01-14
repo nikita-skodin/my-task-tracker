@@ -59,8 +59,7 @@ public class MyTaskTrackerApplication {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userService.findByUsername(username).orElseThrow(
-                () -> new NotFoundException(String.format("User with username %s not found", username)
-                ));
+                () -> new NotFoundException(String.format("User with username %s not found", username)));
     }
 
     @Bean

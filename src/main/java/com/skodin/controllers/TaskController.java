@@ -12,6 +12,7 @@ import com.skodin.services.TaskStateService;
 import com.skodin.util.ModelMapper;
 import com.skodin.util.ProjectTaskStateTuple;
 import com.skodin.validators.TaskValidator;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -20,12 +21,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @RestController
@@ -83,7 +86,7 @@ public class TaskController extends MainController {
     public ResponseEntity<TaskDTO> createTask(
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
-            @RequestBody TaskDTO taskDTO,
+            @Valid @RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
         checkTaskStateInProjectOrThrowEx(projectId, taskStateId, null);
 
@@ -108,7 +111,7 @@ public class TaskController extends MainController {
             @PathVariable("project_id") Long projectId,
             @PathVariable("task-states_id") Long taskStateId,
             @PathVariable("task_id") Long taskId,
-            @RequestBody TaskDTO taskDTO,
+            @Valid@RequestBody TaskDTO taskDTO,
             BindingResult bindingResult) {
         if (taskDTO.getId() != null && !taskDTO.getId().equals(taskId)) {
             throw new BadRequestException("Id in DTO and in url must be the same");

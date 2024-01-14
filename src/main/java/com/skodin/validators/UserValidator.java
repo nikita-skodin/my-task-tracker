@@ -23,6 +23,8 @@ public class UserValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
+
+
         UserEntity user = (UserEntity) target;
 
         String password = user.getPassword();
