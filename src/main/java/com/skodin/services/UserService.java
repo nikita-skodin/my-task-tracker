@@ -26,9 +26,6 @@ public class UserService {
                 .getAuthentication()
                 .getPrincipal();
 
-        System.err.println(principal);
-        System.err.println(principal.getClass());
-
         return (UserEntity) principal;
     }
 
